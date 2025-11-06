@@ -22,6 +22,7 @@ export default function Navbar() {
             <>
               <Link to="/" className="nav-link">Feed</Link>
               <Link to="/profile" className="nav-link">Profile</Link>
+              <Link to="/my-images" className="nav-link">My Images</Link>
               <span className="nav-user">Hey, {user.user_metadata?.username || 'Friend'}!</span>
               <button onClick={handleSignOut} className="btn btn-outline btn-sm">
                 Sign Out
