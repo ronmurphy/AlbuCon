@@ -7,6 +7,8 @@ import Friends from '../pages/Friends'
 import Profile from '../pages/Profile'
 import MyImages from '../pages/MyImages'
 import UserTimeline from '../pages/UserTimeline'
+import FloatingWindow from './FloatingWindow'
+import ImageViewer from './ImageViewer'
 import './ColumnsLayout.css'
 
 export default function ColumnsLayout() {
@@ -17,8 +19,54 @@ export default function ColumnsLayout() {
     { id: 'feed', type: 'feed', data: null, minimized: false }
   ])
 
+  // Floating windows management
+  const [floatingWindows, setFloatingWindows] = useState([])
+  const [nextWindowId, setNextWindowId] = useState(1)
+  const [topZIndex, setTopZIndex] = useState(1000)
+
   const handleSignOut = async () => {
     await signOut()
+  }
+
+  // Floating window functions
+  const openFloatingWindow = (type, data, options = {}) => {
+    const windowId = `window-${nextWindowId}`
+    setNextWindowId(prev => prev + 1)
+
+    const newWindow = {
+      id: windowId,
+      type,
+      data,
+      zIndex: topZIndex + 1,
+      ...options
+    }
+
+    setFloatingWindows(prev => [...prev, newWindow])
+    setTopZIndex(prev => prev + 1)
+  }
+
+  const closeFloatingWindow = (windowId) => {
+    setFloatingWindows(prev => prev.filter(w => w.id !== windowId))
+  }
+
+  const focusFloatingWindow = (windowId) => {
+    setFloatingWindows(prev => prev.map(w =>
+      w.id === windowId ? { ...w, zIndex: topZIndex + 1 } : w
+    ))
+    setTopZIndex(prev => prev + 1)
+  }
+
+  const openImageWindow = (imageUrl, alt = 'Image') => {
+    // Calculate window size based on viewport
+    const maxWidth = Math.min(800, window.innerWidth - 100)
+    const maxHeight = Math.min(600, window.innerHeight - 150)
+
+    openFloatingWindow('image', { imageUrl, alt }, {
+      initialWidth: maxWidth,
+      initialHeight: maxHeight,
+      initialX: 50 + (floatingWindows.length * 30),
+      initialY: 50 + (floatingWindows.length * 30)
+    })
   }
 
   const handleMinimizeFeed = () => {
@@ -84,7 +132,7 @@ export default function ColumnsLayout() {
       case 'feed':
         return (
           <div key={column.id} className="column-item">
-            <Home onMinimize={handleMinimizeFeed} />
+            <Home onMinimize={handleMinimizeFeed} onImageClick={openImageWindow} />
           </div>
         )
 
@@ -149,6 +197,7 @@ export default function ColumnsLayout() {
               username={column.data.username}
               profilePicture={column.data.profilePicture}
               onClose={() => closeColumn(column.id)}
+              onImageClick={openImageWindow}
             />
           </div>
         )
@@ -230,6 +279,26 @@ export default function ColumnsLayout() {
         onCloseColumn={closeColumn}
         onSignOut={handleSignOut}
       />
+
+      {/* Floating Windows */}
+      {floatingWindows.map((window) => (
+        <FloatingWindow
+          key={window.id}
+          id={window.id}
+          title={window.type === 'image' ? window.data.alt : 'Window'}
+          initialX={window.initialX}
+          initialY={window.initialY}
+          initialWidth={window.initialWidth}
+          initialHeight={window.initialHeight}
+          zIndex={window.zIndex}
+          onClose={closeFloatingWindow}
+          onFocus={focusFloatingWindow}
+        >
+          {window.type === 'image' && (
+            <ImageViewer imageUrl={window.data.imageUrl} alt={window.data.alt} />
+          )}
+        </FloatingWindow>
+      ))}
     </div>
   )
 }

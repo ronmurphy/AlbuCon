@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import './PostCard.css'
 
-export default function PostCard({ post, onLikeUpdate }) {
+export default function PostCard({ post, onLikeUpdate, onImageClick }) {
   const { user } = useAuth()
   const [isLiking, setIsLiking] = useState(false)
 
@@ -93,7 +93,11 @@ export default function PostCard({ post, onLikeUpdate }) {
 
       {/* Display image if present */}
       {post.image_url && (
-        <div className="post-image-container">
+        <div
+          className="post-image-container"
+          onClick={() => onImageClick?.(post.image_url, 'Post image')}
+          style={{ cursor: onImageClick ? 'pointer' : 'default' }}
+        >
           <img
             src={post.image_url}
             alt="Post image"

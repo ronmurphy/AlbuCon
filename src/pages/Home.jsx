@@ -4,7 +4,7 @@ import CreatePost from '../components/CreatePost'
 import PostCard from '../components/PostCard'
 import './Home.css'
 
-export default function Home({ onMinimize }) {
+export default function Home({ onMinimize, onImageClick }) {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -95,7 +95,7 @@ export default function Home({ onMinimize }) {
           </div>
         ) : (
           posts.map((post) => (
-            <PostCard key={post.id} post={post} onLikeUpdate={fetchPosts} />
+            <PostCard key={post.id} post={post} onLikeUpdate={fetchPosts} onImageClick={onImageClick} />
           ))
         )}
       </div>
