@@ -17,21 +17,42 @@ export default function Profile() {
       // Fetch user's posts
       const { data: postsData, error: postsError } = await supabase
         .from('posts')
-        .select(`
-          *,
-          profiles!posts_user_id_fkey (username),
-          likes (user_id)
-        `)
+        .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
       if (postsError) throw postsError
 
-      setPosts(postsData || [])
+      // Fetch profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, username')
+        .eq('id', user.id)
+        .single()
+
+      if (profileError) console.error('Profile fetch error:', profileError)
+
+      // Fetch all likes for these posts
+      const postIds = postsData.map(p => p.id)
+      const { data: likesData, error: likesError } = await supabase
+        .from('likes')
+        .select('post_id, user_id')
+        .in('post_id', postIds)
+
+      if (likesError) console.error('Likes fetch error:', likesError)
+
+      // Combine the data
+      const postsWithData = postsData.map(post => ({
+        ...post,
+        profiles: profileData,
+        likes: likesData?.filter(l => l.post_id === post.id) || []
+      }))
+
+      setPosts(postsWithData || [])
 
       // Calculate stats
-      const totalPosts = postsData?.length || 0
-      const totalLikes = postsData?.reduce((sum, post) => sum + (post.likes?.length || 0), 0) || 0
+      const totalPosts = postsWithData.length
+      const totalLikes = postsWithData.reduce((sum, post) => sum + (post.likes?.length || 0), 0)
       setStats({ totalPosts, totalLikes })
     } catch (error) {
       console.error('Error fetching profile data:', error)
