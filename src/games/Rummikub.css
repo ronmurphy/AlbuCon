@@ -1,0 +1,34 @@
+/* Rummikub Game Styles - Nebula Variable Mappings */
+
+:root {
+  /* Map Nebula variables to AlbuCon theme */
+  --nebula-primary: var(--primary);
+  --nebula-secondary: var(--secondary);
+  --nebula-accent: #4f46e5;
+
+  --nebula-bg-primary: var(--surface);
+  --nebula-bg-secondary: var(--background);
+  --nebula-bg-tertiary: var(--border);
+
+  --nebula-text-primary: var(--text-primary);
+  --nebula-text-secondary: var(--text-secondary);
+
+  --nebula-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Rummikub-specific colors */
+  --rummikub-red: #ff4444;
+  --rummikub-blue: #4444ff;
+  --rummikub-yellow: #ffaa00;
+  --rummikub-black: #222222;
+  --rummikub-joker: #9333ea;
+}
+
+/* Rummikub container */
+.rummikub-game {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--nebula-bg-primary);
+  font-family: var(--nebula-font-family);
+}
