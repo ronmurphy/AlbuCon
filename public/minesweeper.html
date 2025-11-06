@@ -1,0 +1,478 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood Minesweeper</title>
+    <meta name="description" content="Play Minesweeper with fun emoji graphics or classic material icons">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --cell-size: 40px;
+        }
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            min-height: 100vh;
+            touch-action: manipulation;
+        }
+        #startMenu {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 20px;
+        }
+        #gameContainer {
+            display: none;
+        }
+        #modeSelect {
+            margin: 20px 0;
+        }
+        .mode-btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #graphicsToggle {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            background: #fff;
+            transition: transform 0.3s;
+        }
+        #graphicsToggle:hover {
+            transform: scale(1.1);
+        }
+        #grid {
+            display: grid;
+            gap: 2px;
+            background: #ccc;
+            padding: 2px;
+            border-radius: 5px;
+        }
+        .cell {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            background: #eee;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+        .cell:hover {
+            background: #ddd;
+        }
+        .revealed {
+            background: #fff !important;
+        }
+        .mine {
+            background: #ff6b6b !important;
+        }
+        #controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        #flagMode {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        #timer, #mineCount {
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            min-width: 60px;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            :root {
+                --cell-size: 35px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="startMenu">
+        <h1>Mood Minesweeper</h1>
+        <div id="modeSelect">
+            <button class="mode-btn" onclick="setGraphicsMode('fun')">Fun Mode 🎨</button>
+            <button class="mode-btn" onclick="setGraphicsMode('boring')">Boring Mode 🎯</button>
+        </div>
+        <p>Click cells to reveal them. Right-click or use flag mode to mark potential mines.</p>
+        <button class="mode-btn" onclick="startGame()">Ready!</button>
+    </div>
+
+    <div id="gameContainer">
+        <div id="controls">
+            <div id="mineCount" style="cursor: pointer">💣 0</div>
+            <button id="flagMode">🚩 Mode: Dig</button>
+            <div id="timer">⏱️ 0</div>
+            <button id="graphicsToggle">🎨</button>
+        </div>
+        <div id="grid"></div>
+    </div>
+
+    <script>
+        const GRID_SIZE = 10;
+        const MINE_COUNT = 15;
+        let grid = [];
+        let revealed = [];
+        let flags = [];
+        let isGameOver = false;
+        let isFlagMode = false;
+        let gameStarted = false;
+        let timer = 0;
+        let timerInterval;
+        let graphicsMode = 'fun';
+        let mineCounterClicks = 0;
+        let lastMineCounterClick = 0;
+        let cheatUsed = false;
+        let cheatTimeout = null;
+
+        const graphics = {
+            fun: {
+                mine: '💥',
+                flag: '🚩',
+                hidden: '🟦',
+                empty: '⬜',
+                numbers: ['⬜', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣']
+            },
+            boring: {
+                mine: 'close',
+                flag: 'flag',
+                hidden: 'square',
+                empty: 'check_box_outline_blank',
+                numbers: ['check_box_outline_blank', 'looks_one', 'looks_two', 'looks_3', 'looks_4', 'looks_5', '6', '7', '8']
+            }
+        };
+
+        function setGraphicsMode(mode, preserveState = false) {
+            graphicsMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.style.background = btn.textContent.includes(mode === 'fun' ? 'Fun' : 'Boring') ? '#4CAF50' : '#ddd';
+            });
+            
+            if (preserveState) {
+                refreshGridGraphics();
+            }
+        }
+
+        function refreshGridGraphics() {
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    const cell = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+                    if (revealed[y][x]) {
+                        cell.classList.add('revealed');
+                        if (grid[y][x] === -1) {
+                            if (graphicsMode === 'boring') {
+                                cell.innerHTML = `<i class="material-icons">${graphics[graphicsMode].mine}</i>`;
+                            } else {
+                                cell.textContent = graphics[graphicsMode].mine;
+                            }
+                        } else if (grid[y][x] === 0) {
+                            if (graphicsMode === 'boring') {
+                                cell.innerHTML = `<i class="material-icons">${graphics[graphicsMode].empty}</i>`;
+                            } else {
+                                cell.textContent = graphics[graphicsMode].empty;
+                            }
+                        } else {
+                            if (graphicsMode === 'boring') {
+                                cell.innerHTML = `<i class="material-icons">${graphics[graphicsMode].numbers[grid[y][x]]}</i>`;
+                            } else {
+                                cell.textContent = graphics[graphicsMode].numbers[grid[y][x]];
+                            }
+                        }
+                    } else if (flags[y][x]) {
+                        if (graphicsMode === 'boring') {
+                            cell.innerHTML = `<i class="material-icons">${graphics[graphicsMode].flag}</i>`;
+                        } else {
+                            cell.textContent = graphics[graphicsMode].flag;
+                        }
+                    } else {
+                        if (graphicsMode === 'boring') {
+                            cell.innerHTML = `<i class="material-icons">${graphics[graphicsMode].hidden}</i>`;
+                        } else {
+                            cell.textContent = graphics[graphicsMode].hidden;
+                        }
+                    }
+                }
+            }
+        }
+
+        function startGame() {
+            document.getElementById('startMenu').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'block';
+            initializeGame();
+        }
+
+        function initializeGame() {
+            grid = [];
+            revealed = [];
+            flags = [];
+            isGameOver = false;
+            gameStarted = false;
+            timer = 0;
+            mineCounterClicks = 0;
+            cheatUsed = false;
+            if (cheatTimeout) clearTimeout(cheatTimeout);
+            clearInterval(timerInterval);
+            document.getElementById('timer').textContent = `⏱️ ${timer}`;
+
+            // Initialize grids
+            for (let i = 0; i < GRID_SIZE; i++) {
+                grid[i] = new Array(GRID_SIZE).fill(0);
+                revealed[i] = new Array(GRID_SIZE).fill(false);
+                flags[i] = new Array(GRID_SIZE).fill(false);
+            }
+
+            // Place mines
+            let minesPlaced = 0;
+            while (minesPlaced < MINE_COUNT) {
+                const x = Math.floor(Math.random() * GRID_SIZE);
+                const y = Math.floor(Math.random() * GRID_SIZE);
+                if (grid[y][x] !== -1) {
+                    grid[y][x] = -1;
+                    minesPlaced++;
+                }
+            }
+
+            // Calculate numbers
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    if (grid[y][x] !== -1) {
+                        let count = 0;
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                if (y + dy >= 0 && y + dy < GRID_SIZE && x + dx >= 0 && x + dx < GRID_SIZE) {
+                                    if (grid[y + dy][x + dx] === -1) count++;
+                                }
+                            }
+                        }
+                        grid[y][x] = count;
+                    }
+                }
+            }
+
+            createGrid();
+            updateMineCount();
+        }
+
+        function createGrid() {
+            const gridElement = document.getElementById('grid');
+            gridElement.style.gridTemplateColumns = `repeat(${GRID_SIZE}, var(--cell-size))`;
+            gridElement.innerHTML = '';
+
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    const cell = document.createElement('button');
+                    cell.className = 'cell';
+                    cell.dataset.x = x;
+                    cell.dataset.y = y;
+                    
+                    if (graphicsMode === 'boring') {
+                        cell.innerHTML = `<i class="material-icons">${graphics[graphicsMode].hidden}</i>`;
+                    } else {
+                        cell.textContent = graphics[graphicsMode].hidden;
+                    }
+
+                    cell.addEventListener('click', () => handleClick(x, y));
+                    cell.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        toggleFlag(x, y);
+                    });
+                    gridElement.appendChild(cell);
+                }
+            }
+        }
+
+        function startTimer() {
+            if (!gameStarted) {
+                gameStarted = true;
+                timerInterval = setInterval(() => {
+                    timer++;
+                    document.getElementById('timer').textContent = `⏱️ ${timer}`;
+                }, 1000);
+            }
+        }
+
+        function handleClick(x, y) {
+            if (isGameOver) return;
+            startTimer();
+
+            if (isFlagMode) {
+                toggleFlag(x, y);
+                return;
+            }
+
+            if (flags[y][x]) return;
+
+            if (grid[y][x] === -1) {
+                gameOver(false);
+                return;
+            }
+
+            revealCell(x, y);
+            checkWin();
+        }
+
+        function toggleFlag(x, y) {
+            if (isGameOver || revealed[y][x]) return;
+            startTimer();
+
+            flags[y][x] = !flags[y][x];
+            const cell = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+            
+            if (graphicsMode === 'boring') {
+                cell.innerHTML = `<i class="material-icons">${flags[y][x] ? graphics[graphicsMode].flag : graphics[graphicsMode].hidden}</i>`;
+            } else {
+                cell.textContent = flags[y][x] ? graphics[graphicsMode].flag : graphics[graphicsMode].hidden;
+            }
+
+            updateMineCount();
+        }
+
+        function revealCell(x, y) {
+            if (revealed[y][x] || flags[y][x]) return;
+            revealed[y][x] = true;
+
+            const cell = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+            cell.classList.add('revealed');
+
+            if (grid[y][x] === 0) {
+                if (graphicsMode === 'boring') {
+                    cell.innerHTML = `<i class="material-icons">${graphics[graphicsMode].empty}</i>`;
+                } else {
+                    cell.textContent = graphics[graphicsMode].empty;
+                }
+                
+                // Reveal neighbors for empty cells
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        if (y + dy >= 0 && y + dy < GRID_SIZE && x + dx >= 0 && x + dx < GRID_SIZE) {
+                            revealCell(x + dx, y + dy);
+                        }
+                    }
+                }
+            } else {
+                if (graphicsMode === 'boring') {
+                    cell.innerHTML = `<i class="material-icons">${graphics[graphicsMode].numbers[grid[y][x]]}</i>`;
+                } else {
+                    cell.textContent = graphics[graphicsMode].numbers[grid[y][x]];
+                }
+            }
+        }
+
+        function gameOver(won) {
+            isGameOver = true;
+            clearInterval(timerInterval);
+
+            // Reveal all mines
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    if (grid[y][x] === -1) {
+                        const cell = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+                        cell.classList.add('revealed');
+                        if (!won) cell.classList.add('mine');
+                        
+                        if (graphicsMode === 'boring') {
+                            cell.innerHTML = `<i class="material-icons">${graphics[graphicsMode].mine}</i>`;
+                        } else {
+                            cell.textContent = graphics[graphicsMode].mine;
+                        }
+                    }
+                }
+            }
+
+            setTimeout(() => {
+                alert(won ? 'Congratulations! You won!' : 'Game Over!');
+                initializeGame();
+            }, 500);
+        }
+
+        function checkWin() {
+            let unrevealedSafeCells = false;
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    if (!revealed[y][x] && grid[y][x] !== -1) {
+                        unrevealedSafeCells = true;
+                        break;
+                    }
+                }
+            }
+            if (!unrevealedSafeCells) {
+                gameOver(true);
+            }
+        }
+
+        function updateMineCount() {
+            let flagCount = flags.flat().filter(f => f).length;
+            document.getElementById('mineCount').textContent = `💣 ${MINE_COUNT - flagCount}`;
+        }
+
+        document.getElementById('mineCount').addEventListener('click', () => {
+            const now = Date.now();
+            if (now - lastMineCounterClick > 1000) {
+                mineCounterClicks = 1;
+            } else {
+                mineCounterClicks++;
+            }
+            lastMineCounterClick = now;
+
+            if (mineCounterClicks === 5 && !cheatUsed && !isGameOver) {
+                cheatUsed = true;
+                // Show mines
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    for (let x = 0; x < GRID_SIZE; x++) {
+                        if (grid[y][x] === -1) {
+                            const cell = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+                            cell.style.backgroundColor = '#ff000066';
+                        }
+                    }
+                }
+                // Reset after 10 seconds
+                if (cheatTimeout) clearTimeout(cheatTimeout);
+                cheatTimeout = setTimeout(() => {
+                    for (let y = 0; y < GRID_SIZE; y++) {
+                        for (let x = 0; x < GRID_SIZE; x++) {
+                            if (grid[y][x] === -1) {
+                                const cell = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+                                cell.style.backgroundColor = '';
+                            }
+                        }
+                    }
+                }, 10000);
+            }
+        });
+
+        document.getElementById('flagMode').addEventListener('click', () => {
+            isFlagMode = !isFlagMode;
+            document.getElementById('flagMode').textContent = `🚩 Mode: ${isFlagMode ? 'Flag' : 'Dig'}`;
+        });
+
+        // Add graphics toggle button functionality
+        document.getElementById('graphicsToggle').addEventListener('click', () => {
+            const newMode = graphicsMode === 'fun' ? 'boring' : 'fun';
+            setGraphicsMode(newMode, true);
+        });
+
+        // Initialize with fun mode selected
+        setGraphicsMode('fun');
+    </script>
+</body>
+</html>
