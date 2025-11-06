@@ -11,16 +11,33 @@ import './ColumnsLayout.css'
 export default function ColumnsLayout() {
   const { user, signOut } = useAuth()
   const [activeView, setActiveView] = useState('feed')
+  const [feedMinimized, setFeedMinimized] = useState(false)
 
   const handleSignOut = async () => {
     await signOut()
   }
 
+  const handleMinimizeFeed = () => {
+    setFeedMinimized(true)
+    // Switch to another view when minimizing
+    if (activeView === 'feed') {
+      setActiveView('friends')
+    }
+  }
+
+  const handleViewChange = (view) => {
+    setActiveView(view)
+    // If navigating to feed, make sure it's not minimized
+    if (view === 'feed') {
+      setFeedMinimized(false)
+    }
+  }
+
   const renderView = () => {
     switch (activeView) {
       case 'feed':
-        return (
-          <Columns title="Feed">
+        return feedMinimized ? null : (
+          <Columns title="Feed" onMinimize={handleMinimizeFeed}>
             <Home />
           </Columns>
         )
@@ -85,8 +102,9 @@ export default function ColumnsLayout() {
       </div>
       <Dock
         activeView={activeView}
-        onViewChange={setActiveView}
+        onViewChange={handleViewChange}
         onSignOut={handleSignOut}
+        feedMinimized={feedMinimized}
       />
     </div>
   )
