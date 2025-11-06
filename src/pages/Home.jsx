@@ -14,16 +14,35 @@ export default function Home() {
         .from('posts')
         .select(`
           *,
-          profiles:user_id (username),
+          profiles!posts_user_id_fkey (username),
           likes (user_id)
         `)
         .order('created_at', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error:', error)
+        throw error
+      }
 
+      console.log('Fetched posts:', data)
       setPosts(data || [])
     } catch (error) {
       console.error('Error fetching posts:', error)
+      // Show posts even if profile fetch fails
+      // Try a simpler query without profiles
+      try {
+        const { data: simplePosts, error: simpleError } = await supabase
+          .from('posts')
+          .select('*')
+          .order('created_at', { ascending: false })
+
+        if (!simpleError && simplePosts) {
+          console.log('Fetched posts without profiles:', simplePosts)
+          setPosts(simplePosts)
+        }
+      } catch (fallbackError) {
+        console.error('Fallback query also failed:', fallbackError)
+      }
     } finally {
       setLoading(false)
     }

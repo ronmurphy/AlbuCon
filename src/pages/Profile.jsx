@@ -19,7 +19,7 @@ export default function Profile() {
         .from('posts')
         .select(`
           *,
-          profiles:user_id (username),
+          profiles!posts_user_id_fkey (username),
           likes (user_id)
         `)
         .eq('user_id', user.id)
