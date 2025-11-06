@@ -1,6 +1,35 @@
 .home-page {
+  position: relative;
   padding: 2rem 1rem;
   min-height: calc(100vh - 80px);
+}
+
+.minimize-feed-btn {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--background);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+  z-index: 10;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.minimize-feed-btn:hover {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: white;
+  border-color: transparent;
+  transform: scale(1.1);
 }
 
 .welcome-banner {

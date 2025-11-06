@@ -37,8 +37,8 @@ export default function ColumnsLayout() {
     switch (activeView) {
       case 'feed':
         return feedMinimized ? null : (
-          <Columns title="Feed" onMinimize={handleMinimizeFeed}>
-            <Home />
+          <Columns>
+            <Home onMinimize={handleMinimizeFeed} />
           </Columns>
         )
 

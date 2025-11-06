@@ -7,13 +7,13 @@ import './CreatePost.css'
 export default function CreatePost({ onPostCreated }) {
   const { user } = useAuth()
   const [content, setContent] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState('')
   const [isPosting, setIsPosting] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState(null)
   const [imageCount, setImageCount] = useState(0)
+  const [showImagePicker, setShowImagePicker] = useState(false)
   const fileInputRef = useRef(null)
 
   // Load user image count on mount
@@ -23,17 +23,18 @@ export default function CreatePost({ onPostCreated }) {
     }
   }, [user])
 
-  const handleImageUrlChange = (url) => {
-    setImageUrl(url)
-    if (isValidImageUrl(url)) {
-      setImagePreview(url)
-      setImageFile(null) // Clear file if URL is set
-    } else {
-      if (url.trim()) {
+  // Auto-detect image URLs in content
+  useEffect(() => {
+    if (!imageFile) {
+      const urlPattern = /https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp)(\?[^\s]*)?/i
+      const match = content.match(urlPattern)
+      if (match && isValidImageUrl(match[0])) {
+        setImagePreview(match[0])
+      } else {
         setImagePreview('')
       }
     }
-  }
+  }, [content, imageFile])
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0]
@@ -53,7 +54,6 @@ export default function CreatePost({ onPostCreated }) {
     }
 
     setImageFile(file)
-    setImageUrl('') // Clear URL if file is selected
     setError(null)
 
     // Create preview
@@ -63,7 +63,6 @@ export default function CreatePost({ onPostCreated }) {
   }
 
   const clearImage = () => {
-    setImageUrl('')
     setImageFile(null)
     setImagePreview('')
     if (fileInputRef.current) {
@@ -74,7 +73,7 @@ export default function CreatePost({ onPostCreated }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!content.trim() && !imageUrl && !imageFile) {
+    if (!content.trim() && !imageFile) {
       setError('Please write something or add an image!')
       return
     }
@@ -88,7 +87,14 @@ export default function CreatePost({ onPostCreated }) {
     setError(null)
 
     try {
-      let finalImageUrl = imageUrl
+      let finalImageUrl = null
+
+      // Check for image URL in content (don't count it against char limit)
+      const urlPattern = /https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp)(\?[^\s]*)?/i
+      const match = content.match(urlPattern)
+      if (match && isValidImageUrl(match[0])) {
+        finalImageUrl = match[0]
+      }
 
       // Upload file if selected
       if (imageFile) {
@@ -138,83 +144,75 @@ export default function CreatePost({ onPostCreated }) {
     )
   }
 
+  const charsRemaining = 500 - content.length
+  const showCharCount = charsRemaining < 50
+
   return (
     <div className="create-post card">
-      <h2 className="create-post-title">Share Something Positive! ✨</h2>
       <form onSubmit={handleSubmit}>
-        <textarea
-          className="post-input"
-          placeholder="What made you smile today? Share your joy, gratitude, or positive thoughts..."
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          maxLength={500}
-          disabled={isPosting || isUploading}
-        />
-
-        {/* Image Options */}
-        <div className="image-options">
-          <div className="image-input-group">
-            <label htmlFor="image-url" className="image-label">
-              🔗 Image URL:
-            </label>
-            <input
-              id="image-url"
-              type="url"
-              className="image-url-input"
-              placeholder="https://example.com/image.jpg"
-              value={imageUrl}
-              onChange={(e) => handleImageUrlChange(e.target.value)}
-              disabled={isPosting || isUploading || imageFile}
-            />
-          </div>
-
-          <div className="image-divider">OR</div>
-
-          <div className="image-upload-group">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
-              onChange={handleFileSelect}
-              disabled={isPosting || isUploading || imageUrl}
-              style={{ display: 'none' }}
-              id="file-upload"
-            />
-            <label htmlFor="file-upload" className="btn btn-secondary btn-sm upload-btn">
-              📷 Upload Image ({imageCount}/20)
-            </label>
-            {imageCount >= 20 && (
-              <span className="limit-warning">Limit reached!</span>
-            )}
-          </div>
+        <div className="post-input-wrapper">
+          <textarea
+            className="post-input compact"
+            placeholder="What made you smile today? 😊"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            maxLength={500}
+            disabled={isPosting || isUploading}
+            rows={3}
+          />
         </div>
 
         {/* Image Preview */}
         {imagePreview && (
           <div className="image-preview-container">
             <img src={imagePreview} alt="Preview" className="image-preview" />
-            <button
-              type="button"
-              className="clear-image-btn"
-              onClick={clearImage}
-              disabled={isPosting || isUploading}
-            >
-              ✕
-            </button>
+            {imageFile && (
+              <button
+                type="button"
+                className="clear-image-btn"
+                onClick={clearImage}
+                disabled={isPosting || isUploading}
+              >
+                ✕
+              </button>
+            )}
           </div>
         )}
 
         <div className="create-post-footer">
-          <span className="char-count">
-            {content.length}/500
-          </span>
+          <div className="post-actions">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              onChange={handleFileSelect}
+              disabled={isPosting || isUploading}
+              style={{ display: 'none' }}
+              id="file-upload"
+            />
+            <button
+              type="button"
+              className="icon-btn camera-btn"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isPosting || isUploading || imageCount >= 20}
+              title={`Upload Image • ${imageCount}/20 images`}
+            >
+              📷
+            </button>
+
+            {showCharCount && (
+              <span className={`char-count ${charsRemaining < 20 ? 'warning' : ''}`}>
+                {charsRemaining}
+              </span>
+            )}
+          </div>
 
           <button
             type="submit"
-            className="btn btn-primary"
-            disabled={isPosting || isUploading || (!content.trim() && !imageUrl && !imageFile)}
+            className="btn btn-primary btn-sm"
+            disabled={isPosting || isUploading || (!content.trim() && !imageFile)}
           >
-            {isUploading ? 'Uploading...' : isPosting ? 'Posting...' : 'Post ✨'}
+            {isUploading ? 'Uploading...' : isPosting ? 'Posting...' : 'Post'}
           </button>
         </div>
 

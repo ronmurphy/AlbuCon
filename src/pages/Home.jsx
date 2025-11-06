@@ -4,7 +4,7 @@ import CreatePost from '../components/CreatePost'
 import PostCard from '../components/PostCard'
 import './Home.css'
 
-export default function Home() {
+export default function Home({ onMinimize }) {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -76,6 +76,16 @@ export default function Home() {
 
   return (
     <div className="container home-page">
+      {onMinimize && (
+        <button
+          className="minimize-feed-btn"
+          onClick={onMinimize}
+          title="Minimize feed to dock"
+        >
+          ➖
+        </button>
+      )}
+
       <CreatePost onPostCreated={fetchPosts} />
 
       <div className="feed">
