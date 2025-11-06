@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import './Columns.css'
 
-export default function Columns({ children, title }) {
+export default function Columns({ children, title, onMinimize }) {
   const [currentColumn, setCurrentColumn] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const [startX, setStartX] = useState(0)
@@ -87,6 +87,15 @@ export default function Columns({ children, title }) {
       {title && (
         <div className="columns-header">
           <h2 className="columns-title">{title}</h2>
+          {onMinimize && (
+            <button
+              className="minimize-button"
+              onClick={onMinimize}
+              title="Minimize to dock"
+            >
+              ➖
+            </button>
+          )}
         </div>
       )}
 

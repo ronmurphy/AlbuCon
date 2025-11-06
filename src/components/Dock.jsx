@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { getPendingRequests } from '../lib/friendsUtils'
 import './Dock.css'
 
-export default function Dock({ activeView, onViewChange, onSignOut }) {
+export default function Dock({ activeView, onViewChange, onSignOut, feedMinimized }) {
   const { user } = useAuth()
   const [pendingCount, setPendingCount] = useState(0)
 
@@ -52,17 +52,22 @@ export default function Dock({ activeView, onViewChange, onSignOut }) {
 
           const isActive = item.views && item.views.includes(activeView)
 
+          const isMinimized = item.id === 'feed' && feedMinimized
+
           return (
             <button
               key={item.id}
-              className={`dock-item ${isActive ? 'active' : ''}`}
+              className={`dock-item ${isActive ? 'active' : ''} ${isMinimized ? 'minimized' : ''}`}
               onClick={() => handleDockClick(item)}
-              title={item.label}
+              title={isMinimized ? `${item.label} (Minimized)` : item.label}
             >
               <div className="dock-icon-wrapper">
                 <span className="dock-icon">{item.icon}</span>
                 {item.badge > 0 && (
                   <span className="dock-badge">{item.badge}</span>
+                )}
+                {isMinimized && (
+                  <span className="minimized-indicator">➖</span>
                 )}
               </div>
               <span className="dock-label">{item.label}</span>
