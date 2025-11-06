@@ -3,6 +3,22 @@
   min-height: calc(100vh - 80px);
 }
 
+.images-count {
+  text-align: center;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(78, 205, 196, 0.1) 100%);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.images-count strong {
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
 .page-header {
   text-align: center;
   margin-bottom: 2rem;

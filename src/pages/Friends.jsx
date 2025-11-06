@@ -184,11 +184,6 @@ export default function Friends() {
 
   return (
     <div className="container friends-page">
-      <div className="page-header">
-        <h1 className="page-title">Friends</h1>
-        <p className="page-subtitle">Connect with friends and share positive vibes!</p>
-      </div>
-
       {error && (
         <div className="error-message">{error}</div>
       )}
