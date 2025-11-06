@@ -10,6 +10,7 @@ import UserTimeline from '../pages/UserTimeline'
 import FloatingWindow from './FloatingWindow'
 import ImageViewer from './ImageViewer'
 import RummikubGame from '../games/RummikubGame'
+import AppLauncher from './AppLauncher'
 import './ColumnsLayout.css'
 
 export default function ColumnsLayout() {
@@ -24,6 +25,9 @@ export default function ColumnsLayout() {
   const [floatingWindows, setFloatingWindows] = useState([])
   const [nextWindowId, setNextWindowId] = useState(1)
   const [topZIndex, setTopZIndex] = useState(1000)
+
+  // App launcher state
+  const [isLauncherOpen, setIsLauncherOpen] = useState(false)
 
   const handleSignOut = async () => {
     await signOut()
@@ -93,6 +97,23 @@ export default function ColumnsLayout() {
       minHeight: 600
     })
   }
+
+  // App launcher
+  const toggleLauncher = () => {
+    setIsLauncherOpen(prev => !prev)
+  }
+
+  // Define available apps
+  const apps = [
+    {
+      id: 'rummikub',
+      name: 'Rummikub',
+      icon: '🎲',
+      description: 'Classic tile-based game. Play against AI opponents.',
+      onClick: openRummikubWindow
+    },
+    // More apps can be added here
+  ]
 
   const handleMinimizeFeed = () => {
     setOpenColumns(prev =>
@@ -303,7 +324,7 @@ export default function ColumnsLayout() {
         }}
         onCloseColumn={closeColumn}
         onSignOut={handleSignOut}
-        onOpenRummikub={openRummikubWindow}
+        onOpenLauncher={toggleLauncher}
       />
 
       {/* Floating Windows */}
@@ -330,6 +351,13 @@ export default function ColumnsLayout() {
           )}
         </FloatingWindow>
       ))}
+
+      {/* App Launcher */}
+      <AppLauncher
+        isOpen={isLauncherOpen}
+        onClose={() => setIsLauncherOpen(false)}
+        apps={apps}
+      />
     </div>
   )
 }
