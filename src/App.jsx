@@ -6,6 +6,7 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Profile from './pages/Profile'
 import MyImages from './pages/MyImages'
+import Friends from './pages/Friends'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/my-images" element={<MyImages />} />
+            <Route path="/friends" element={<Friends />} />
           </Routes>
         </div>
       </Router>
