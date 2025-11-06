@@ -76,13 +76,6 @@ export default function Home() {
 
   return (
     <div className="container home-page">
-      <div className="welcome-banner">
-        <h1 className="welcome-title">Welcome to AlbuCon ✨</h1>
-        <p className="welcome-subtitle">
-          A space for sharing positive vibes, gratitude, and joy!
-        </p>
-      </div>
-
       <CreatePost onPostCreated={fetchPosts} />
 
       <div className="feed">

@@ -118,11 +118,8 @@ export default function MyImages() {
 
   return (
     <div className="container my-images-page">
-      <div className="page-header">
-        <h1 className="page-title">My Images</h1>
-        <p className="page-subtitle">
-          You have uploaded <strong>{images.length}/20</strong> images
-        </p>
+      <div className="images-count">
+        <strong>{images.length}/20</strong> images uploaded
       </div>
 
       {error && (
