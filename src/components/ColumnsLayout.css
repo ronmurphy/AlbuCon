@@ -12,6 +12,55 @@
   padding-bottom: 100px; /* Space for dock */
 }
 
+/* Column Item */
+.column-item {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.column-header {
+  padding: 1rem 2rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.column-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.close-column-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--background);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.close-column-btn:hover {
+  background: #ff6b6b;
+  color: white;
+  border-color: transparent;
+  transform: scale(1.1);
+}
+
 /* Settings View */
 .settings-view {
   height: 100%;

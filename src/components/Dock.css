@@ -186,6 +186,59 @@
   background: linear-gradient(135deg, rgba(255, 217, 61, 0.2) 0%, rgba(255, 179, 71, 0.2) 100%);
 }
 
+/* User Timeline Icons */
+.dock-icon-wrapper.user-icon {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  background: transparent;
+}
+
+.dock-user-pic {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.dock-user-initial {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  border-radius: 16px;
+}
+
+.dock-close-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.dock-close-overlay:hover {
+  background: rgba(255, 107, 107, 0.9);
+}
+
+.dock-item.user-timeline .dock-icon-wrapper {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
 .dock-indicator {
   position: absolute;
   bottom: -8px;
