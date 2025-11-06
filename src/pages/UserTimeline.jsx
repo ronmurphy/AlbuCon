@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import PostCard from '../components/PostCard'
 import './UserTimeline.css'
 
-export default function UserTimeline({ userId, username, profilePicture, onClose }) {
+export default function UserTimeline({ userId, username, profilePicture, onClose, onImageClick }) {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [userProfile, setUserProfile] = useState(null)
@@ -108,7 +108,7 @@ export default function UserTimeline({ userId, username, profilePicture, onClose
           </div>
         ) : (
           posts.map((post) => (
-            <PostCard key={post.id} post={post} onLikeUpdate={fetchUserPosts} />
+            <PostCard key={post.id} post={post} onLikeUpdate={fetchUserPosts} onImageClick={onImageClick} />
           ))
         )}
       </div>
