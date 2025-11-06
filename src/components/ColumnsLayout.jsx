@@ -10,6 +10,8 @@ import UserTimeline from '../pages/UserTimeline'
 import FloatingWindow from './FloatingWindow'
 import ImageViewer from './ImageViewer'
 import RummikubGame from '../games/RummikubGame'
+import Minesweeper from '../games/Minesweeper'
+import WriteFlow from '../games/WriteFlow'
 import AppLauncher from './AppLauncher'
 import './ColumnsLayout.css'
 
@@ -98,6 +100,54 @@ export default function ColumnsLayout() {
     })
   }
 
+  const openMinesweeperWindow = () => {
+    // Check if Minesweeper window is already open
+    const exists = floatingWindows.find(w => w.type === 'minesweeper')
+    if (exists) {
+      focusFloatingWindow(exists.id)
+      return
+    }
+
+    // Compact window for Minesweeper
+    const width = Math.min(600, window.innerWidth * 0.8)
+    const height = Math.min(700, window.innerHeight * 0.85)
+    const x = (window.innerWidth - width) / 2
+    const y = (window.innerHeight - height) / 2
+
+    openFloatingWindow('minesweeper', {}, {
+      initialWidth: width,
+      initialHeight: height,
+      initialX: x,
+      initialY: y,
+      minWidth: 400,
+      minHeight: 500
+    })
+  }
+
+  const openWriteFlowWindow = () => {
+    // Check if WriteFlow window is already open
+    const exists = floatingWindows.find(w => w.type === 'writeflow')
+    if (exists) {
+      focusFloatingWindow(exists.id)
+      return
+    }
+
+    // Large window for text editor
+    const width = Math.min(1000, window.innerWidth * 0.9)
+    const height = Math.min(700, window.innerHeight * 0.85)
+    const x = (window.innerWidth - width) / 2
+    const y = (window.innerHeight - height) / 2
+
+    openFloatingWindow('writeflow', {}, {
+      initialWidth: width,
+      initialHeight: height,
+      initialX: x,
+      initialY: y,
+      minWidth: 600,
+      minHeight: 400
+    })
+  }
+
   // App launcher
   const toggleLauncher = () => {
     setIsLauncherOpen(prev => !prev)
@@ -112,7 +162,20 @@ export default function ColumnsLayout() {
       description: 'Classic tile-based game. Play against AI opponents.',
       onClick: openRummikubWindow
     },
-    // More apps can be added here
+    {
+      id: 'minesweeper',
+      name: 'Minesweeper',
+      icon: '💣',
+      description: 'Classic puzzle game. Find all the mines!',
+      onClick: openMinesweeperWindow
+    },
+    {
+      id: 'writeflow',
+      name: 'WriteFlow',
+      icon: '📝',
+      description: 'Full-featured text editor with rich formatting.',
+      onClick: openWriteFlowWindow
+    },
   ]
 
   const handleMinimizeFeed = () => {
@@ -328,29 +391,44 @@ export default function ColumnsLayout() {
       />
 
       {/* Floating Windows */}
-      {floatingWindows.map((window) => (
-        <FloatingWindow
-          key={window.id}
-          id={window.id}
-          title={window.type === 'image' ? window.data.alt : window.type === 'rummikub' ? 'Rummikub' : 'Window'}
-          initialX={window.initialX}
-          initialY={window.initialY}
-          initialWidth={window.initialWidth}
-          initialHeight={window.initialHeight}
-          minWidth={window.minWidth}
-          minHeight={window.minHeight}
-          zIndex={window.zIndex}
-          onClose={closeFloatingWindow}
-          onFocus={focusFloatingWindow}
-        >
-          {window.type === 'image' && (
-            <ImageViewer imageUrl={window.data.imageUrl} alt={window.data.alt} />
-          )}
-          {window.type === 'rummikub' && (
-            <RummikubGame />
-          )}
-        </FloatingWindow>
-      ))}
+      {floatingWindows.map((window) => {
+        // Set window title based on type
+        let title = 'Window'
+        if (window.type === 'image') title = window.data.alt
+        else if (window.type === 'rummikub') title = 'Rummikub'
+        else if (window.type === 'minesweeper') title = 'Minesweeper'
+        else if (window.type === 'writeflow') title = 'WriteFlow'
+
+        return (
+          <FloatingWindow
+            key={window.id}
+            id={window.id}
+            title={title}
+            initialX={window.initialX}
+            initialY={window.initialY}
+            initialWidth={window.initialWidth}
+            initialHeight={window.initialHeight}
+            minWidth={window.minWidth}
+            minHeight={window.minHeight}
+            zIndex={window.zIndex}
+            onClose={closeFloatingWindow}
+            onFocus={focusFloatingWindow}
+          >
+            {window.type === 'image' && (
+              <ImageViewer imageUrl={window.data.imageUrl} alt={window.data.alt} />
+            )}
+            {window.type === 'rummikub' && (
+              <RummikubGame />
+            )}
+            {window.type === 'minesweeper' && (
+              <Minesweeper />
+            )}
+            {window.type === 'writeflow' && (
+              <WriteFlow />
+            )}
+          </FloatingWindow>
+        )
+      })}
 
       {/* App Launcher */}
       <AppLauncher
