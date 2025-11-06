@@ -13,7 +13,7 @@ import {
 } from '../lib/friendsUtils'
 import './Friends.css'
 
-export default function Friends() {
+export default function Friends({ onOpenUserTimeline }) {
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState('friends') // friends, find, pending, sent
   const [friends, setFriends] = useState([])
@@ -231,32 +231,44 @@ export default function Friends() {
           ) : (
             <div className="friends-list">
               {friends.map((friendship) => (
-                <div key={friendship.id} className="friend-card card">
-                  <div className="friend-avatar">
-                    {friendship.friend_profile_picture ? (
-                      <img
-                        src={friendship.friend_profile_picture}
-                        alt={friendship.friend_username}
-                        className="friend-profile-pic"
-                        onError={(e) => {
-                          e.target.style.display = 'none'
-                          e.target.nextSibling.style.display = 'flex'
-                        }}
-                      />
-                    ) : null}
-                    <div className="friend-initial" style={friendship.friend_profile_picture ? { display: 'none' } : {}}>
-                      {friendship.friend_username?.[0]?.toUpperCase() || '?'}
+                <div key={friendship.id} className="friend-card card clickable">
+                  <div
+                    className="friend-content"
+                    onClick={() => onOpenUserTimeline?.(
+                      friendship.friend_id,
+                      friendship.friend_username,
+                      friendship.friend_profile_picture
+                    )}
+                  >
+                    <div className="friend-avatar">
+                      {friendship.friend_profile_picture ? (
+                        <img
+                          src={friendship.friend_profile_picture}
+                          alt={friendship.friend_username}
+                          className="friend-profile-pic"
+                          onError={(e) => {
+                            e.target.style.display = 'none'
+                            e.target.nextSibling.style.display = 'flex'
+                          }}
+                        />
+                      ) : null}
+                      <div className="friend-initial" style={friendship.friend_profile_picture ? { display: 'none' } : {}}>
+                        {friendship.friend_username?.[0]?.toUpperCase() || '?'}
+                      </div>
                     </div>
-                  </div>
-                  <div className="friend-info">
-                    <h3 className="friend-username">{friendship.friend_username || 'Unknown User'}</h3>
-                    <p className="friend-since">
-                      Friends since {new Date(friendship.created_at).toLocaleDateString()}
-                    </p>
+                    <div className="friend-info">
+                      <h3 className="friend-username">{friendship.friend_username || 'Unknown User'}</h3>
+                      <p className="friend-since">
+                        Friends since {new Date(friendship.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
                   <button
                     className="btn btn-remove"
-                    onClick={() => handleRemoveFriend(friendship.id, friendship.friend_username)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleRemoveFriend(friendship.id, friendship.friend_username)
+                    }}
                     disabled={actionLoading === friendship.id}
                   >
                     {actionLoading === friendship.id ? 'Removing...' : 'Unfriend'}

@@ -3,9 +3,10 @@ import { useAuth } from '../contexts/AuthContext'
 import { getPendingRequests } from '../lib/friendsUtils'
 import './Dock.css'
 
-export default function Dock({ activeView, onViewChange, onSignOut, feedMinimized }) {
+export default function Dock({ openColumns, onToggleColumn, onCloseColumn, onSignOut }) {
   const { user } = useAuth()
   const [pendingCount, setPendingCount] = useState(0)
+  const [hoveredItem, setHoveredItem] = useState(null)
 
   useEffect(() => {
     if (user) {
@@ -24,41 +25,51 @@ export default function Dock({ activeView, onViewChange, onSignOut, feedMinimize
     }
   }
 
-  const dockItems = [
-    { id: 'feed', icon: '🏠', label: 'Feed', views: ['feed'] },
-    { id: 'friends', icon: '👥', label: 'Friends', badge: pendingCount, views: ['friends'] },
-    { id: 'profile', icon: '👤', label: 'Profile', views: ['profile'] },
-    { id: 'images', icon: '🖼️', label: 'My Images', views: ['images'] },
-    { id: 'divider', type: 'divider' },
-    { id: 'settings', icon: '⚙️', label: 'Settings', views: ['settings'] },
+  // Static dock items
+  const staticItems = [
+    { id: 'feed', icon: '🏠', label: 'Feed', type: 'feed' },
+    { id: 'friends', icon: '👥', label: 'Friends', badge: pendingCount, type: 'friends' },
+    { id: 'profile', icon: '👤', label: 'Profile', type: 'profile' },
+    { id: 'images', icon: '🖼️', label: 'My Images', type: 'images' },
   ]
 
-  const handleDockClick = (item) => {
-    if (item.id === 'settings') {
-      // Settings will show sign out option
-      onViewChange('settings')
-    } else if (item.views) {
-      onViewChange(item.views[0])
+  // Get user timeline columns
+  const userTimelineColumns = openColumns.filter(col => col.type === 'user' && !col.minimized)
+
+  // Check if a column is open
+  const isColumnOpen = (type) => {
+    return openColumns.some(col => col.type === type && !col.minimized)
+  }
+
+  // Check if feed is minimized
+  const feedColumn = openColumns.find(col => col.id === 'feed')
+  const feedMinimized = feedColumn?.minimized
+
+  const handleItemClick = (item) => {
+    if (item.type === 'user') {
+      // User timeline - close it
+      onCloseColumn(item.columnId)
+    } else {
+      // Static items - toggle
+      onToggleColumn(item.type, item.data)
     }
   }
 
   return (
     <div className="dock-container">
       <div className="dock">
-        {dockItems.map((item) => {
-          if (item.type === 'divider') {
-            return <div key={item.id} className="dock-divider" />
-          }
-
-          const isActive = item.views && item.views.includes(activeView)
-
+        {/* Static Items */}
+        {staticItems.map((item) => {
+          const isOpen = isColumnOpen(item.type)
           const isMinimized = item.id === 'feed' && feedMinimized
 
           return (
             <button
               key={item.id}
-              className={`dock-item ${isActive ? 'active' : ''} ${isMinimized ? 'minimized' : ''}`}
-              onClick={() => handleDockClick(item)}
+              className={`dock-item ${isOpen ? 'active' : ''} ${isMinimized ? 'minimized' : ''}`}
+              onClick={() => handleItemClick(item)}
+              onMouseEnter={() => setHoveredItem(item.id)}
+              onMouseLeave={() => setHoveredItem(null)}
               title={isMinimized ? `${item.label} (Minimized)` : item.label}
             >
               <div className="dock-icon-wrapper">
@@ -71,10 +82,83 @@ export default function Dock({ activeView, onViewChange, onSignOut, feedMinimize
                 )}
               </div>
               <span className="dock-label">{item.label}</span>
-              {isActive && <div className="dock-indicator" />}
+              {isOpen && !isMinimized && <div className="dock-indicator" />}
             </button>
           )
         })}
+
+        {/* Divider before user timelines */}
+        {userTimelineColumns.length > 0 && (
+          <div className="dock-divider" />
+        )}
+
+        {/* Dynamic User Timeline Icons */}
+        {userTimelineColumns.map((column) => {
+          const { userId, username, profilePicture } = column.data
+          const isHovered = hoveredItem === column.id
+
+          return (
+            <button
+              key={column.id}
+              className="dock-item user-timeline active"
+              onClick={() => handleItemClick({ type: 'user', columnId: column.id })}
+              onMouseEnter={() => setHoveredItem(column.id)}
+              onMouseLeave={() => setHoveredItem(null)}
+              title={`${username}'s Timeline`}
+            >
+              <div className="dock-icon-wrapper user-icon">
+                {profilePicture ? (
+                  <img
+                    src={profilePicture}
+                    alt={username}
+                    className="dock-user-pic"
+                    onError={(e) => {
+                      e.target.style.display = 'none'
+                      e.target.nextSibling.style.display = 'flex'
+                    }}
+                  />
+                ) : null}
+                <div
+                  className="dock-user-initial"
+                  style={profilePicture ? { display: 'none' } : {}}
+                >
+                  {username?.[0]?.toUpperCase() || '?'}
+                </div>
+                {isHovered && (
+                  <div
+                    className="dock-close-overlay"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onCloseColumn(column.id)
+                    }}
+                  >
+                    ✕
+                  </div>
+                )}
+              </div>
+              <span className="dock-label">{username}</span>
+              <div className="dock-indicator" />
+            </button>
+          )
+        })}
+
+        {/* Divider before settings */}
+        <div className="dock-divider" />
+
+        {/* Settings */}
+        <button
+          className={`dock-item ${isColumnOpen('settings') ? 'active' : ''}`}
+          onClick={() => onToggleColumn('settings')}
+          onMouseEnter={() => setHoveredItem('settings')}
+          onMouseLeave={() => setHoveredItem(null)}
+          title="Settings"
+        >
+          <div className="dock-icon-wrapper">
+            <span className="dock-icon">⚙️</span>
+          </div>
+          <span className="dock-label">Settings</span>
+          {isColumnOpen('settings') && <div className="dock-indicator" />}
+        </button>
       </div>
     </div>
   )

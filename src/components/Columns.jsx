@@ -1,17 +1,34 @@
 import { useState, useRef, useEffect } from 'react'
 import './Columns.css'
 
-export default function Columns({ children, title, onMinimize }) {
+export default function Columns({ children, visibleColumnCount, openColumns }) {
   const [currentColumn, setCurrentColumn] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const [startX, setStartX] = useState(0)
   const [scrollLeft, setScrollLeft] = useState(0)
   const columnsRef = useRef(null)
 
-  const columns = Array.isArray(children) ? children : [children]
+  // Filter out null/undefined children (minimized columns)
+  const columns = Array.isArray(children) ? children.filter(Boolean) : [children].filter(Boolean)
+
+  // Calculate column width based on number of visible columns
+  const getColumnWidth = () => {
+    if (!visibleColumnCount) return '100%'
+
+    if (visibleColumnCount === 1) return '100%'
+    if (visibleColumnCount === 2) return '50%'
+    if (visibleColumnCount === 3) return '33.333%'
+    if (visibleColumnCount === 4) return '25%'
+    // 5+ columns use fixed width with horizontal scroll
+    return '400px'
+  }
+
+  const columnWidth = getColumnWidth()
+  const useFixedWidth = visibleColumnCount >= 5
 
   // Touch/Mouse drag scrolling
   const handleMouseDown = (e) => {
+    if (!useFixedWidth) return // Only enable drag for 5+ columns
     setIsDragging(true)
     setStartX(e.pageX - columnsRef.current.offsetLeft)
     setScrollLeft(columnsRef.current.scrollLeft)
@@ -30,11 +47,13 @@ export default function Columns({ children, title, onMinimize }) {
   }
 
   const handleTouchStart = (e) => {
+    if (!useFixedWidth) return
     setStartX(e.touches[0].pageX - columnsRef.current.offsetLeft)
     setScrollLeft(columnsRef.current.scrollLeft)
   }
 
   const handleTouchMove = (e) => {
+    if (!useFixedWidth) return
     const x = e.touches[0].pageX - columnsRef.current.offsetLeft
     const walk = (x - startX) * 2
     columnsRef.current.scrollLeft = scrollLeft - walk
@@ -84,39 +103,36 @@ export default function Columns({ children, title, onMinimize }) {
 
   return (
     <div className="columns-container">
-      {title && (
-        <div className="columns-header">
-          <h2 className="columns-title">{title}</h2>
-          {onMinimize && (
-            <button
-              className="minimize-button"
-              onClick={onMinimize}
-              title="Minimize to dock"
-            >
-              ➖
-            </button>
-          )}
-        </div>
-      )}
-
       <div
         ref={columnsRef}
-        className={`columns-wrapper ${isDragging ? 'dragging' : ''}`}
+        className={`columns-wrapper ${isDragging ? 'dragging' : ''} ${useFixedWidth ? 'fixed-width' : 'responsive-width'}`}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onMouseMove={handleMouseMove}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
+        style={{
+          cursor: useFixedWidth ? 'grab' : 'default'
+        }}
       >
         {columns.map((column, index) => (
-          <div key={index} className="column">
+          <div
+            key={index}
+            className="column"
+            style={{
+              flex: useFixedWidth ? 'none' : undefined,
+              minWidth: columnWidth,
+              maxWidth: useFixedWidth ? '400px' : columnWidth,
+              width: columnWidth
+            }}
+          >
             {column}
           </div>
         ))}
       </div>
 
-      {/* Mobile navigation buttons */}
+      {/* Mobile navigation buttons - show only on mobile */}
       {columns.length > 1 && (
         <div className="columns-mobile-nav">
           <button

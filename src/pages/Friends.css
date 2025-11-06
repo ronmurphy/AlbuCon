@@ -125,6 +125,18 @@
   box-shadow: 0 6px 24px var(--shadow);
 }
 
+.friend-card.clickable {
+  cursor: pointer;
+}
+
+.friend-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
 /* Friend Avatar */
 .friend-avatar {
   width: 60px;
