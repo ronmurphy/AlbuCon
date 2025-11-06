@@ -9,6 +9,7 @@ export default function Profile() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({ totalPosts: 0, totalLikes: 0 })
+  const [profilePicture, setProfilePicture] = useState(null)
 
   const fetchUserPosts = async () => {
     if (!user) return
@@ -26,11 +27,13 @@ export default function Profile() {
       // Fetch profile
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('id, username')
+        .select('id, username, profile_picture_url')
         .eq('id', user.id)
         .single()
 
       if (profileError) console.error('Profile fetch error:', profileError)
+
+      setProfilePicture(profileData?.profile_picture_url)
 
       // Fetch all likes for these posts
       const postIds = postsData.map(p => p.id)
@@ -77,7 +80,20 @@ export default function Profile() {
     <div className="container profile-page">
       <div className="profile-header card">
         <div className="profile-avatar-large">
-          {user?.user_metadata?.username?.[0]?.toUpperCase() || '?'}
+          {profilePicture ? (
+            <img
+              src={profilePicture}
+              alt="Profile picture"
+              className="profile-picture-img"
+              onError={(e) => {
+                e.target.style.display = 'none'
+                e.target.nextSibling.style.display = 'flex'
+              }}
+            />
+          ) : null}
+          <div className="profile-initial" style={{ display: profilePicture ? 'none' : 'flex' }}>
+            {user?.user_metadata?.username?.[0]?.toUpperCase() || '?'}
+          </div>
         </div>
         <h1 className="profile-username">
           {user?.user_metadata?.username || 'Anonymous'}

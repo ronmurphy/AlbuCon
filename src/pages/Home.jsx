@@ -21,7 +21,7 @@ export default function Home() {
       // Fetch profiles separately
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, username')
+        .select('id, username, profile_picture_url')
 
       if (profilesError) throw profilesError
 
