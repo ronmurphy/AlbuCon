@@ -10,26 +10,40 @@ export default function Home() {
 
   const fetchPosts = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch posts with profiles and likes using manual join
+      const { data: postsData, error: postsError } = await supabase
         .from('posts')
-        .select(`
-          *,
-          profiles!posts_user_id_fkey (username),
-          likes (user_id)
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
 
-      if (error) {
-        console.error('Supabase error:', error)
-        throw error
-      }
+      if (postsError) throw postsError
 
-      console.log('Fetched posts:', data)
-      setPosts(data || [])
+      // Fetch profiles separately
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, username')
+
+      if (profilesError) throw profilesError
+
+      // Fetch likes separately
+      const { data: likesData, error: likesError } = await supabase
+        .from('likes')
+        .select('post_id, user_id')
+
+      if (likesError) throw likesError
+
+      // Combine the data
+      const postsWithData = postsData.map(post => ({
+        ...post,
+        profiles: profilesData.find(p => p.id === post.user_id),
+        likes: likesData.filter(l => l.post_id === post.id)
+      }))
+
+      console.log('Fetched posts with profiles:', postsWithData)
+      setPosts(postsWithData || [])
     } catch (error) {
       console.error('Error fetching posts:', error)
-      // Show posts even if profile fetch fails
-      // Try a simpler query without profiles
+      // Fallback: show posts without additional data
       try {
         const { data: simplePosts, error: simpleError } = await supabase
           .from('posts')
@@ -37,8 +51,8 @@ export default function Home() {
           .order('created_at', { ascending: false })
 
         if (!simpleError && simplePosts) {
-          console.log('Fetched posts without profiles:', simplePosts)
-          setPosts(simplePosts)
+          console.log('Fallback: Fetched posts without profiles:', simplePosts)
+          setPosts(simplePosts.map(p => ({ ...p, likes: [] })))
         }
       } catch (fallbackError) {
         console.error('Fallback query also failed:', fallbackError)
