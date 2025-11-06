@@ -63,7 +63,20 @@ export default function PostCard({ post, onLikeUpdate }) {
       <div className="post-header">
         <div className="post-author">
           <div className="author-avatar">
-            {post.profiles?.username?.[0]?.toUpperCase() || '?'}
+            {post.profiles?.profile_picture_url ? (
+              <img
+                src={post.profiles.profile_picture_url}
+                alt={`${post.profiles?.username}'s profile`}
+                className="author-profile-pic"
+                onError={(e) => {
+                  e.target.style.display = 'none'
+                  e.target.nextSibling.style.display = 'flex'
+                }}
+              />
+            ) : null}
+            <div className="author-initial" style={{ display: post.profiles?.profile_picture_url ? 'none' : 'flex' }}>
+              {post.profiles?.username?.[0]?.toUpperCase() || '?'}
+            </div>
           </div>
           <div className="author-info">
             <div className="author-name">

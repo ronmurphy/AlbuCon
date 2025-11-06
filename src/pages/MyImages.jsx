@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { getUserImages, deleteImage } from '../lib/imageUtils'
+import { supabase } from '../lib/supabase'
 import './MyImages.css'
 
 export default function MyImages() {
@@ -8,6 +9,8 @@ export default function MyImages() {
   const [images, setImages] = useState([])
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState(null)
+  const [settingProfilePic, setSettingProfilePic] = useState(null)
+  const [currentProfilePic, setCurrentProfilePic] = useState(null)
   const [error, setError] = useState(null)
 
   const loadImages = async () => {
@@ -17,6 +20,15 @@ export default function MyImages() {
       setLoading(true)
       const data = await getUserImages(user.id)
       setImages(data)
+
+      // Load current profile picture
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('profile_picture_url')
+        .eq('id', user.id)
+        .single()
+
+      setCurrentProfilePic(profileData?.profile_picture_url)
     } catch (err) {
       console.error('Error loading images:', err)
       setError('Failed to load images')
@@ -28,6 +40,28 @@ export default function MyImages() {
   useEffect(() => {
     loadImages()
   }, [user])
+
+  const handleSetProfilePicture = async (imageUrl) => {
+    try {
+      setSettingProfilePic(imageUrl)
+      setError(null)
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({ profile_picture_url: imageUrl })
+        .eq('id', user.id)
+
+      if (error) throw error
+
+      setCurrentProfilePic(imageUrl)
+      alert('Profile picture updated! 🎉')
+    } catch (err) {
+      console.error('Error setting profile picture:', err)
+      setError('Failed to set profile picture. Please try again.')
+    } finally {
+      setSettingProfilePic(null)
+    }
+  }
 
   const handleDelete = async (imageId, storagePath) => {
     if (!confirm('Are you sure you want to delete this image? This cannot be undone.')) {
@@ -103,35 +137,56 @@ export default function MyImages() {
         </div>
       ) : (
         <div className="images-grid">
-          {images.map((image) => (
-            <div key={image.id} className="image-item card">
-              <div className="image-thumbnail">
-                <img
-                  src={image.public_url}
-                  alt="Uploaded image"
-                  loading="lazy"
-                  onError={(e) => {
-                    e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999"%3EError%3C/text%3E%3C/svg%3E'
-                  }}
-                />
-              </div>
+          {images.map((image) => {
+            const isCurrentProfilePic = currentProfilePic === image.public_url
+            return (
+              <div key={image.id} className={`image-item card ${isCurrentProfilePic ? 'profile-pic-active' : ''}`}>
+                {isCurrentProfilePic && (
+                  <div className="profile-pic-badge">
+                    ✨ Profile Picture
+                  </div>
+                )}
 
-              <div className="image-info">
-                <div className="image-details">
-                  <span className="image-size">{formatFileSize(image.file_size)}</span>
-                  <span className="image-date">{formatDate(image.created_at)}</span>
+                <div className="image-thumbnail">
+                  <img
+                    src={image.public_url}
+                    alt="Uploaded image"
+                    loading="lazy"
+                    onError={(e) => {
+                      e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999"%3EError%3C/text%3E%3C/svg%3E'
+                    }}
+                  />
                 </div>
 
-                <button
-                  className="btn btn-delete"
-                  onClick={() => handleDelete(image.id, image.storage_path)}
-                  disabled={deleting === image.id}
-                >
-                  {deleting === image.id ? 'Deleting...' : '🗑️ Delete'}
-                </button>
+                <div className="image-info">
+                  <div className="image-details">
+                    <span className="image-size">{formatFileSize(image.file_size)}</span>
+                    <span className="image-date">{formatDate(image.created_at)}</span>
+                  </div>
+
+                  <div className="image-actions">
+                    {!isCurrentProfilePic && (
+                      <button
+                        className="btn btn-profile"
+                        onClick={() => handleSetProfilePicture(image.public_url)}
+                        disabled={settingProfilePic !== null}
+                      >
+                        {settingProfilePic === image.public_url ? 'Setting...' : '👤 Set as Profile'}
+                      </button>
+                    )}
+
+                    <button
+                      className="btn btn-delete"
+                      onClick={() => handleDelete(image.id, image.storage_path)}
+                      disabled={deleting === image.id}
+                    >
+                      {deleting === image.id ? 'Deleting...' : '🗑️ Delete'}
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
