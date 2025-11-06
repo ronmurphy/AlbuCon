@@ -9,6 +9,7 @@ import MyImages from '../pages/MyImages'
 import UserTimeline from '../pages/UserTimeline'
 import FloatingWindow from './FloatingWindow'
 import ImageViewer from './ImageViewer'
+import RummikubGame from '../games/RummikubGame'
 import './ColumnsLayout.css'
 
 export default function ColumnsLayout() {
@@ -66,6 +67,30 @@ export default function ColumnsLayout() {
       initialHeight: maxHeight,
       initialX: 50 + (floatingWindows.length * 30),
       initialY: 50 + (floatingWindows.length * 30)
+    })
+  }
+
+  const openRummikubWindow = () => {
+    // Check if Rummikub window is already open
+    const exists = floatingWindows.find(w => w.type === 'rummikub')
+    if (exists) {
+      focusFloatingWindow(exists.id)
+      return
+    }
+
+    // Large window for game - 90% of viewport
+    const width = Math.min(1200, window.innerWidth * 0.9)
+    const height = Math.min(800, window.innerHeight * 0.9)
+    const x = (window.innerWidth - width) / 2
+    const y = (window.innerHeight - height) / 2
+
+    openFloatingWindow('rummikub', {}, {
+      initialWidth: width,
+      initialHeight: height,
+      initialX: x,
+      initialY: y,
+      minWidth: 800,
+      minHeight: 600
     })
   }
 
@@ -278,6 +303,7 @@ export default function ColumnsLayout() {
         }}
         onCloseColumn={closeColumn}
         onSignOut={handleSignOut}
+        onOpenRummikub={openRummikubWindow}
       />
 
       {/* Floating Windows */}
@@ -285,17 +311,22 @@ export default function ColumnsLayout() {
         <FloatingWindow
           key={window.id}
           id={window.id}
-          title={window.type === 'image' ? window.data.alt : 'Window'}
+          title={window.type === 'image' ? window.data.alt : window.type === 'rummikub' ? 'Rummikub' : 'Window'}
           initialX={window.initialX}
           initialY={window.initialY}
           initialWidth={window.initialWidth}
           initialHeight={window.initialHeight}
+          minWidth={window.minWidth}
+          minHeight={window.minHeight}
           zIndex={window.zIndex}
           onClose={closeFloatingWindow}
           onFocus={focusFloatingWindow}
         >
           {window.type === 'image' && (
             <ImageViewer imageUrl={window.data.imageUrl} alt={window.data.alt} />
+          )}
+          {window.type === 'rummikub' && (
+            <RummikubGame />
           )}
         </FloatingWindow>
       ))}

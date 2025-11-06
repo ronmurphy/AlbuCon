@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { getPendingRequests } from '../lib/friendsUtils'
 import './Dock.css'
 
-export default function Dock({ openColumns, onToggleColumn, onCloseColumn, onSignOut }) {
+export default function Dock({ openColumns, onToggleColumn, onCloseColumn, onSignOut, onOpenRummikub }) {
   const { user } = useAuth()
   const [pendingCount, setPendingCount] = useState(0)
   const [hoveredItem, setHoveredItem] = useState(null)
@@ -141,6 +141,23 @@ export default function Dock({ openColumns, onToggleColumn, onCloseColumn, onSig
             </button>
           )
         })}
+
+        {/* Divider before games/apps */}
+        <div className="dock-divider" />
+
+        {/* Rummikub Game */}
+        <button
+          className="dock-item"
+          onClick={onOpenRummikub}
+          onMouseEnter={() => setHoveredItem('rummikub')}
+          onMouseLeave={() => setHoveredItem(null)}
+          title="Rummikub Game"
+        >
+          <div className="dock-icon-wrapper">
+            <span className="dock-icon">🎲</span>
+          </div>
+          <span className="dock-label">Rummikub</span>
+        </button>
 
         {/* Divider before settings */}
         <div className="dock-divider" />
