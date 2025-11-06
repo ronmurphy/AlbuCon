@@ -78,6 +78,21 @@ export default function PostCard({ post, onLikeUpdate }) {
         {post.content}
       </div>
 
+      {/* Display image if present */}
+      {post.image_url && (
+        <div className="post-image-container">
+          <img
+            src={post.image_url}
+            alt="Post image"
+            className="post-image"
+            onError={(e) => {
+              e.target.style.display = 'none'
+              console.error('Failed to load image:', post.image_url)
+            }}
+          />
+        </div>
+      )}
+
       <div className="post-footer">
         <button
           className={`like-button ${hasLiked ? 'liked' : ''}`}
