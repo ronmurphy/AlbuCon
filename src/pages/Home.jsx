@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
 import CreatePost from '../components/CreatePost'
 import PostCard from '../components/PostCard'
+import FilteredPostCard from '../components/FilteredPostCard'
+import { defaultPreferences } from '../lib/contentTypes'
 import './Home.css'
 
 export default function Home({ onMinimize, onImageClick }) {
+  const { user } = useAuth()
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [contentPreferences, setContentPreferences] = useState(defaultPreferences)
 
   const fetchPosts = async () => {
     try {
@@ -62,9 +67,28 @@ export default function Home({ onMinimize, onImageClick }) {
     }
   }
 
+  const loadUserPreferences = async () => {
+    if (!user) return
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('content_preferences')
+        .eq('id', user.id)
+        .single()
+
+      if (!error && data?.content_preferences) {
+        setContentPreferences(data.content_preferences)
+      }
+    } catch (error) {
+      console.error('Error loading content preferences:', error)
+    }
+  }
+
   useEffect(() => {
     fetchPosts()
-  }, [])
+    loadUserPreferences()
+  }, [user])
 
   if (loading) {
     return (
@@ -94,9 +118,23 @@ export default function Home({ onMinimize, onImageClick }) {
             <p>No posts yet. Be the first to share something positive! 🌟</p>
           </div>
         ) : (
-          posts.map((post) => (
-            <PostCard key={post.id} post={post} onLikeUpdate={fetchPosts} onImageClick={onImageClick} />
-          ))
+          posts.map((post) => {
+            const contentType = post.content_type || 'general'
+            const isVisible = contentPreferences[contentType]
+
+            if (!isVisible) {
+              return <FilteredPostCard key={post.id} contentType={contentType} />
+            }
+
+            return (
+              <PostCard
+                key={post.id}
+                post={post}
+                onLikeUpdate={fetchPosts}
+                onImageClick={onImageClick}
+              />
+            )
+          })
         )}
       </div>
     </div>

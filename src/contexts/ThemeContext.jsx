@@ -106,8 +106,13 @@ export function ThemeProvider({ children }) {
 
   const applyPreviewTheme = () => {
     if (previewTheme) {
-      changeTheme(previewTheme.id)
-      setPreviewTheme(null)
+      const themeId = previewTheme.id
+      // Apply theme first
+      changeTheme(themeId)
+      // Close preview after a tiny delay to ensure theme applies
+      setTimeout(() => {
+        setPreviewTheme(null)
+      }, 100)
     }
   }
 

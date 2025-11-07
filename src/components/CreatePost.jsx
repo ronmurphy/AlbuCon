@@ -2,11 +2,13 @@ import { useState, useRef, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { uploadImage, isValidImageUrl, getUserImageCount } from '../lib/imageUtils'
+import { contentTypes } from '../lib/contentTypes'
 import './CreatePost.css'
 
 export default function CreatePost({ onPostCreated }) {
   const { user } = useAuth()
   const [content, setContent] = useState('')
+  const [contentType, setContentType] = useState('general')
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState('')
   const [isPosting, setIsPosting] = useState(false)
@@ -116,13 +118,15 @@ export default function CreatePost({ onPostCreated }) {
         .insert({
           content: content.trim(),
           user_id: user.id,
-          image_url: finalImageUrl || null
+          image_url: finalImageUrl || null,
+          content_type: contentType
         })
 
       if (error) throw error
 
       // Clear the form
       setContent('')
+      setContentType('general')
       clearImage()
 
       // Notify parent component to refresh the feed
@@ -199,6 +203,20 @@ export default function CreatePost({ onPostCreated }) {
             >
               📷
             </button>
+
+            <select
+              className="content-type-select"
+              value={contentType}
+              onChange={(e) => setContentType(e.target.value)}
+              disabled={isPosting || isUploading}
+              title="Content Type"
+            >
+              {contentTypes.map(type => (
+                <option key={type.id} value={type.id}>
+                  {type.icon} {type.name}
+                </option>
+              ))}
+            </select>
 
             {showCharCount && (
               <span className={`char-count ${charsRemaining < 20 ? 'warning' : ''}`}>

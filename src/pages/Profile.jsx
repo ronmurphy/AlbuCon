@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { supabase } from '../lib/supabase'
 import PostCard from '../components/PostCard'
+import { contentTypes, defaultPreferences } from '../lib/contentTypes'
 import './Profile.css'
 
 export default function Profile() {
@@ -12,6 +13,8 @@ export default function Profile() {
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({ totalPosts: 0, totalLikes: 0 })
   const [profilePicture, setProfilePicture] = useState(null)
+  const [contentPreferences, setContentPreferences] = useState(defaultPreferences)
+  const [savingPreferences, setSavingPreferences] = useState(false)
 
   const fetchUserPosts = async () => {
     if (!user) return
@@ -29,13 +32,18 @@ export default function Profile() {
       // Fetch profile
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('id, username, profile_picture_url')
+        .select('id, username, profile_picture_url, content_preferences')
         .eq('id', user.id)
         .single()
 
       if (profileError) console.error('Profile fetch error:', profileError)
 
       setProfilePicture(profileData?.profile_picture_url)
+
+      // Load content preferences
+      if (profileData?.content_preferences) {
+        setContentPreferences(profileData.content_preferences)
+      }
 
       // Fetch all likes for these posts
       const postIds = postsData.map(p => p.id)
@@ -69,6 +77,33 @@ export default function Profile() {
   useEffect(() => {
     fetchUserPosts()
   }, [user])
+
+  const saveContentPreferences = async (newPreferences) => {
+    setSavingPreferences(true)
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ content_preferences: newPreferences })
+        .eq('id', user.id)
+
+      if (error) throw error
+
+      setContentPreferences(newPreferences)
+    } catch (error) {
+      console.error('Error saving content preferences:', error)
+      alert('Failed to save preferences. Please try again.')
+    } finally {
+      setSavingPreferences(false)
+    }
+  }
+
+  const toggleContentType = (typeId) => {
+    const newPreferences = {
+      ...contentPreferences,
+      [typeId]: !contentPreferences[typeId]
+    }
+    saveContentPreferences(newPreferences)
+  }
 
   if (loading) {
     return (
@@ -141,6 +176,37 @@ export default function Profile() {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Content Preferences */}
+      <div className="content-preferences-section card">
+        <h2 className="section-title">Content Preferences</h2>
+        <p className="section-description">Choose what types of content you want to see in your feed</p>
+        <div className="preferences-grid">
+          {contentTypes.map((type) => (
+            <button
+              key={type.id}
+              className={`preference-option ${contentPreferences[type.id] ? 'enabled' : 'disabled'}`}
+              onClick={() => toggleContentType(type.id)}
+              disabled={savingPreferences}
+              title={type.description}
+            >
+              <div className="preference-icon" style={{ color: type.color }}>
+                {type.icon}
+              </div>
+              <div className="preference-info">
+                <div className="preference-name">{type.name}</div>
+                <div className="preference-description">{type.description}</div>
+              </div>
+              <div className="preference-toggle">
+                {contentPreferences[type.id] ? '✓ Visible' : '✕ Hidden'}
+              </div>
+            </button>
+          ))}
+        </div>
+        <p className="preferences-note">
+          💡 Hidden content will show as placeholders like "A post was shared (Political)"
+        </p>
       </div>
 
       <div className="profile-posts">
