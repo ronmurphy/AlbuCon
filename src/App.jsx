@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
@@ -7,6 +8,7 @@ import ColumnsLayout from './components/ColumnsLayout'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import InviteRedeem from './pages/InviteRedeem'
+import { checkRedditProxyHealth } from './services/redditService'
 
 function AppContent() {
   const { user } = useAuth()
@@ -31,6 +33,16 @@ function AppContent() {
 }
 
 function App() {
+  useEffect(() => {
+    // Check Reddit proxy health on startup
+    checkRedditProxyHealth().then(({ healthy, message }) => {
+      console.log('🔍 Reddit Proxy Health Check:', message)
+      if (!healthy) {
+        console.warn('⚠️ Reddit integration may not work properly. Check the console for details.')
+      }
+    })
+  }, [])
+
   return (
     <ThemeProvider>
       <AuthProvider>

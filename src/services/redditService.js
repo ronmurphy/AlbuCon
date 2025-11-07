@@ -1,6 +1,96 @@
 import { supabase } from '../lib/supabase'
 
 /**
+ * Check if the Reddit proxy Edge Function is deployed and working
+ * @returns {Promise<{healthy: boolean, message: string}>}
+ */
+export async function checkRedditProxyHealth() {
+  try {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+
+    if (!supabaseUrl || supabaseUrl === 'YOUR_SUPABASE_URL') {
+      return {
+        healthy: false,
+        message: '❌ Supabase URL not configured. Set VITE_SUPABASE_URL in your .env file'
+      }
+    }
+
+    // Test with a minimal Reddit API call
+    const testUrl = 'https://www.reddit.com/r/programming.json?limit=1'
+    const proxyUrl = `${supabaseUrl}/functions/v1/reddit-proxy?url=${encodeURIComponent(testUrl)}`
+
+    const response = await fetch(proxyUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return {
+          healthy: false,
+          message: '❌ Reddit proxy Edge Function not deployed. Run: supabase functions deploy reddit-proxy'
+        }
+      }
+      const errorData = await response.json().catch(() => ({}))
+      return {
+        healthy: false,
+        message: `⚠️ Reddit proxy returned error ${response.status}: ${errorData.error || response.statusText}`
+      }
+    }
+
+    const data = await response.json()
+    if (data.data?.children?.length > 0) {
+      return {
+        healthy: true,
+        message: '✅ Reddit proxy Edge Function is working!'
+      }
+    }
+
+    return {
+      healthy: false,
+      message: '⚠️ Reddit proxy responded but returned no data'
+    }
+  } catch (error) {
+    return {
+      healthy: false,
+      message: `❌ Error checking Reddit proxy: ${error.message}`
+    }
+  }
+}
+
+/**
+ * Fetch data from Reddit via Supabase Edge Function proxy
+ * This bypasses CORS restrictions by using a server-side proxy
+ * @param {string} redditUrl - Full Reddit JSON URL to fetch
+ * @returns {Promise<object>} Reddit API response
+ */
+async function fetchViaProxy(redditUrl) {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+
+  if (!supabaseUrl || supabaseUrl === 'YOUR_SUPABASE_URL') {
+    throw new Error('Supabase URL not configured. Please set VITE_SUPABASE_URL in your .env file')
+  }
+
+  const proxyUrl = `${supabaseUrl}/functions/v1/reddit-proxy?url=${encodeURIComponent(redditUrl)}`
+
+  const response = await fetch(proxyUrl, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+    throw new Error(`Proxy error: ${response.status} - ${errorData.error || response.statusText}`)
+  }
+
+  return await response.json()
+}
+
+/**
  * Fetch posts from a Reddit subreddit
  * @param {string} subreddit - Subreddit name (without r/)
  * @param {number} limit - Number of posts to fetch
@@ -8,22 +98,9 @@ import { supabase } from '../lib/supabase'
  */
 export async function fetchRedditSubreddit(subreddit, limit = 25) {
   try {
-    // Reddit's public JSON API - no auth required!
+    // Reddit's public JSON API - fetched via Supabase Edge Function to avoid CORS
     const url = `https://www.reddit.com/r/${subreddit}.json?limit=${limit}`
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'AlbuCon:v1.0.0 (by /u/sphere_social_app)' // Reddit requires User-Agent
-      }
-    })
-
-    if (!response.ok) {
-      throw new Error(`Reddit API error: ${response.status} ${response.statusText}`)
-    }
-
-    const data = await response.json()
+    const data = await fetchViaProxy(url)
     return data.data?.children || []
   } catch (error) {
     console.error(`Error fetching Reddit subreddit r/${subreddit}:`, error)
@@ -39,21 +116,9 @@ export async function fetchRedditSubreddit(subreddit, limit = 25) {
  */
 export async function fetchRedditUser(username, limit = 25) {
   try {
+    // Reddit's public JSON API - fetched via Supabase Edge Function to avoid CORS
     const url = `https://www.reddit.com/user/${username}.json?limit=${limit}`
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'AlbuCon:v1.0.0 (by /u/sphere_social_app)'
-      }
-    })
-
-    if (!response.ok) {
-      throw new Error(`Reddit API error: ${response.status} ${response.statusText}`)
-    }
-
-    const data = await response.json()
+    const data = await fetchViaProxy(url)
     return data.data?.children || []
   } catch (error) {
     console.error(`Error fetching Reddit user u/${username}:`, error)
