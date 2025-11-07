@@ -222,25 +222,9 @@ export default function Home({ onMinimize, onImageClick }) {
               const platformKey = `platform_${post.platform}`
               const isPlatformVisible = contentPreferences[platformKey] !== false
 
-              // If platform is hidden, show filtered card
+              // If platform is hidden, don't render anything (no placeholder)
               if (!isPlatformVisible) {
-                return (
-                  <div key={`filtered-platform-${post.id}`} className="filtered-post-card card">
-                    <div className="filtered-content">
-                      <span className="filtered-icon">🔇</span>
-                      <div className="filtered-text">
-                        <p className="filtered-message">
-                          Post from {post.platform} hidden
-                        </p>
-                        <p className="filtered-hint">
-                          You've chosen not to see posts from {post.platform}.
-                          <br />
-                          Change this in your Profile → Platform Filtering.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )
+                return null
               }
 
               return (
