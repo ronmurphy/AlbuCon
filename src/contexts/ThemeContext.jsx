@@ -70,6 +70,7 @@ export const themes = [
 
 export function ThemeProvider({ children }) {
   const [currentTheme, setCurrentTheme] = useState('dark')
+  const [previewTheme, setPreviewTheme] = useState(null)
 
   // Load theme from localStorage on mount
   useEffect(() => {
@@ -92,11 +93,33 @@ export function ThemeProvider({ children }) {
     localStorage.setItem('albucon-theme', themeId)
   }
 
+  const openPreview = (themeId) => {
+    const theme = themes.find(t => t.id === themeId)
+    if (theme) {
+      setPreviewTheme(theme)
+    }
+  }
+
+  const closePreview = () => {
+    setPreviewTheme(null)
+  }
+
+  const applyPreviewTheme = () => {
+    if (previewTheme) {
+      changeTheme(previewTheme.id)
+      setPreviewTheme(null)
+    }
+  }
+
   const value = {
     currentTheme,
     changeTheme,
     themes,
-    getCurrentTheme: () => themes.find(t => t.id === currentTheme)
+    getCurrentTheme: () => themes.find(t => t.id === currentTheme),
+    previewTheme,
+    openPreview,
+    closePreview,
+    applyPreviewTheme
   }
 
   return (

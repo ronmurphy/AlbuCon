@@ -7,7 +7,7 @@ import './Profile.css'
 
 export default function Profile() {
   const { user } = useAuth()
-  const { currentTheme, changeTheme, themes } = useTheme()
+  const { currentTheme, openPreview, themes } = useTheme()
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({ totalPosts: 0, totalLikes: 0 })
@@ -123,8 +123,8 @@ export default function Profile() {
             <button
               key={theme.id}
               className={`theme-option ${currentTheme === theme.id ? 'active' : ''}`}
-              onClick={() => changeTheme(theme.id)}
-              title={theme.description}
+              onClick={() => openPreview(theme.id)}
+              title={`Preview ${theme.description}`}
             >
               <div className="theme-preview" style={{
                 background: `linear-gradient(135deg, ${theme.preview.bg} 0%, ${theme.preview.accent} 100%)`

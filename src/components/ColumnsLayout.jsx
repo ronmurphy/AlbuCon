@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { useTheme } from '../contexts/ThemeContext'
 import Dock from './Dock'
 import Columns from './Columns'
 import Home from '../pages/Home'
@@ -9,6 +10,7 @@ import MyImages from '../pages/MyImages'
 import UserTimeline from '../pages/UserTimeline'
 import FloatingWindow from './FloatingWindow'
 import ImageViewer from './ImageViewer'
+import ThemePreview from './ThemePreview'
 import RummikubGame from '../games/RummikubGame'
 import Minesweeper from '../games/Minesweeper'
 import WriteFlow from '../games/WriteFlow'
@@ -19,6 +21,7 @@ import './ColumnsLayout.css'
 
 export default function ColumnsLayout() {
   const { user, signOut } = useAuth()
+  const { previewTheme, closePreview, applyPreviewTheme } = useTheme()
 
   // Column management - feed is always present
   const [openColumns, setOpenColumns] = useState([
@@ -508,6 +511,29 @@ export default function ColumnsLayout() {
         onClose={() => setIsLauncherOpen(false)}
         apps={apps}
       />
+
+      {/* Theme Preview Window */}
+      {previewTheme && (
+        <FloatingWindow
+          id="theme-preview"
+          title={`Preview: ${previewTheme.name} Theme`}
+          initialX={Math.max(50, (window.innerWidth - 700) / 2)}
+          initialY={Math.max(50, (window.innerHeight - 600) / 2)}
+          initialWidth={Math.min(700, window.innerWidth - 100)}
+          initialHeight={Math.min(600, window.innerHeight - 100)}
+          minWidth={500}
+          minHeight={400}
+          zIndex={10000}
+          onClose={closePreview}
+          onFocus={() => {}}
+        >
+          <ThemePreview
+            theme={previewTheme}
+            onApply={applyPreviewTheme}
+            onCancel={closePreview}
+          />
+        </FloatingWindow>
+      )}
     </div>
   )
 }
