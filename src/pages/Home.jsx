@@ -244,6 +244,7 @@ export default function Home({ onMinimize, onImageClick }) {
                 post={post}
                 onLikeUpdate={fetchPosts}
                 onImageClick={onImageClick}
+                onPostDeleted={fetchPosts}
               />
             )
           })

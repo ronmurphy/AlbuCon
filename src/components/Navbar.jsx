@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { siteName, logoEmoji } from '../config/naming'
+import NotificationBell from './NotificationBell'
 import './Navbar.css'
 
 export default function Navbar() {
@@ -16,7 +17,10 @@ export default function Navbar() {
 
         <div className="nav-links">
           {user ? (
-            <span className="nav-user">Hey, {user.user_metadata?.username || 'Friend'}! 👋</span>
+            <>
+              <NotificationBell />
+              <span className="nav-user">Hey, {user.user_metadata?.username || 'Friend'}! 👋</span>
+            </>
           ) : (
             <>
               <Link to="/login" className="nav-link">Login</Link>

@@ -1,15 +1,19 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import CommentsSection from './CommentsSection'
+import FollowButton from './FollowButton'
 import './PostCard.css'
 
-export default function PostCard({ post, onLikeUpdate, onImageClick }) {
+export default function PostCard({ post, onLikeUpdate, onImageClick, onPostDeleted }) {
   const { user } = useAuth()
   const [isLiking, setIsLiking] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   // Check if current user has liked this post
   const hasLiked = post.likes?.some(like => like.user_id === user?.id)
   const likeCount = post.likes?.length || 0
+  const isOwnPost = user?.id === post.user_id
 
   const handleLike = async () => {
     if (!user || isLiking) return
@@ -40,6 +44,29 @@ export default function PostCard({ post, onLikeUpdate, onImageClick }) {
       console.error('Error toggling like:', error)
     } finally {
       setIsLiking(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!confirm('Delete this post? This will also delete all comments and likes.')) return
+
+    setIsDeleting(true)
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', post.id)
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      if (onPostDeleted) onPostDeleted(post.id)
+      if (onLikeUpdate) onLikeUpdate()
+    } catch (error) {
+      console.error('Error deleting post:', error)
+      alert('Failed to delete post. Please try again.')
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -84,7 +111,23 @@ export default function PostCard({ post, onLikeUpdate, onImageClick }) {
             </div>
             <div className="post-time">{formatDate(post.created_at)}</div>
           </div>
+          {!isOwnPost && (
+            <FollowButton
+              userId={post.user_id}
+              username={post.profiles?.username}
+            />
+          )}
         </div>
+        {isOwnPost && (
+          <button
+            className="post-delete-btn"
+            onClick={handleDelete}
+            disabled={isDeleting}
+            title="Delete post"
+          >
+            {isDeleting ? '...' : '🗑️'}
+          </button>
+        )}
       </div>
 
       <div className="post-content">
@@ -120,6 +163,9 @@ export default function PostCard({ post, onLikeUpdate, onImageClick }) {
           <span className="like-count">{likeCount}</span>
         </button>
       </div>
+
+      {/* Comments Section */}
+      <CommentsSection postId={post.id} />
     </div>
   )
 }
