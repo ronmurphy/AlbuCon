@@ -152,6 +152,14 @@ export default function Home({ onMinimize, onImageClick }) {
     return combined
   }
 
+  // Count visible external posts (after platform filtering)
+  const getVisibleExternalPostsCount = () => {
+    return externalPosts.filter(post => {
+      const platformKey = `platform_${post.platform}`
+      return contentPreferences[platformKey] !== false
+    }).length
+  }
+
   useEffect(() => {
     fetchPosts()
     fetchExternalPosts()
@@ -167,6 +175,7 @@ export default function Home({ onMinimize, onImageClick }) {
   }
 
   const allPosts = getAllPosts()
+  const visibleExternalCount = getVisibleExternalPostsCount()
 
   return (
     <div className="container home-page">
@@ -192,9 +201,9 @@ export default function Home({ onMinimize, onImageClick }) {
         >
           {refreshing ? '🔄 Refreshing...' : '🔄 Refresh Feeds'}
         </button>
-        {externalPosts.length > 0 && (
+        {visibleExternalCount > 0 && (
           <span className="external-posts-count">
-            {externalPosts.length} post{externalPosts.length !== 1 ? 's' : ''} from external services
+            {visibleExternalCount} post{visibleExternalCount !== 1 ? 's' : ''} from external services
           </span>
         )}
       </div>
