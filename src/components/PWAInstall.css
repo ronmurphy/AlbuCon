@@ -1,0 +1,111 @@
+.pwa-install-card {
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.pwa-install-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.pwa-install-header h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.btn-close {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface-variant);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-close:hover {
+  background: #ff6b6b;
+  color: white;
+  transform: scale(1.1);
+}
+
+.pwa-install-description {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.pwa-installed-message {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 1.05rem;
+}
+
+.pwa-benefits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.pwa-benefit {
+  padding: 0.5rem;
+  background: var(--surface-variant);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+}
+
+.pwa-install-btn {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.75rem;
+}
+
+.pwa-uninstall-instructions {
+  color: var(--text-secondary);
+}
+
+.pwa-uninstall-instructions p {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.pwa-uninstall-instructions ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.pwa-uninstall-instructions li {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .pwa-install-card {
+    padding: 1rem;
+  }
+
+  .pwa-benefits {
+    grid-template-columns: 1fr;
+  }
+
+  .pwa-install-header h3 {
+    font-size: 1.1rem;
+  }
+}
