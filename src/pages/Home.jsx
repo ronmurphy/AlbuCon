@@ -7,6 +7,7 @@ import ExternalPostCard from '../components/ExternalPostCard'
 import FilteredPostCard from '../components/FilteredPostCard'
 import { defaultPreferences } from '../lib/contentTypes'
 import { fetchAllBlueskyFeeds, getExternalPosts } from '../services/blueskyService'
+import { fetchAllMastodonFeeds } from '../services/mastodonService'
 import './Home.css'
 
 export default function Home({ onMinimize, onImageClick }) {
@@ -105,10 +106,20 @@ export default function Home({ onMinimize, onImageClick }) {
 
     setRefreshing(true)
     try {
-      const newPostsCount = await fetchAllBlueskyFeeds(user.id)
-      if (newPostsCount > 0) {
+      // Fetch from both Bluesky and Mastodon
+      const [blueskyCount, mastodonCount] = await Promise.all([
+        fetchAllBlueskyFeeds(user.id),
+        fetchAllMastodonFeeds(user.id)
+      ])
+
+      const totalNewPosts = blueskyCount + mastodonCount
+
+      if (totalNewPosts > 0) {
         await fetchExternalPosts()
-        alert(`✓ Fetched ${newPostsCount} new posts from Bluesky!`)
+        const platformsMsg = []
+        if (blueskyCount > 0) platformsMsg.push(`${blueskyCount} from Bluesky`)
+        if (mastodonCount > 0) platformsMsg.push(`${mastodonCount} from Mastodon`)
+        alert(`✓ Fetched ${totalNewPosts} new posts! (${platformsMsg.join(', ')})`)
       } else {
         alert('No new posts found')
       }

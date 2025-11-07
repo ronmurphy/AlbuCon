@@ -24,9 +24,9 @@ export default function ConnectedServices() {
       id: 'mastodon',
       name: 'Mastodon',
       icon: '🐘',
-      description: 'Coming soon',
-      placeholder: '@user@mastodon.social',
-      enabled: false
+      description: 'Follow Mastodon users (no login required)',
+      placeholder: 'user@mastodon.social',
+      enabled: true
     },
     {
       id: 'reddit',
@@ -67,10 +67,19 @@ export default function ConnectedServices() {
 
     setAddingAccount(true)
     try {
-      // For Bluesky, ensure handle ends with .bsky.social if no domain provided
+      // Format handle based on platform
       let formattedHandle = newHandle.trim()
+
       if (selectedPlatform === 'bluesky' && !formattedHandle.includes('.')) {
+        // For Bluesky, ensure handle ends with .bsky.social if no domain provided
         formattedHandle = `${formattedHandle}.bsky.social`
+      } else if (selectedPlatform === 'mastodon') {
+        // For Mastodon, ensure format is username@instance.social
+        if (!formattedHandle.includes('@')) {
+          formattedHandle = `${formattedHandle}@mastodon.social`
+        } else if (formattedHandle.startsWith('@')) {
+          formattedHandle = formattedHandle.substring(1) // Remove leading @
+        }
       }
 
       const { data, error } = await supabase
