@@ -271,37 +271,45 @@ export default function ColumnsLayout() {
       name: 'Rummikub',
       icon: '🎲',
       description: 'Classic tile-based game. Play against AI opponents.',
-      onClick: openRummikubWindow
+      onClick: openRummikubWindow,
+      mobileSupported: false // Too complex for mobile
     },
     {
       id: 'donutsmagic',
       name: "Donut's Magic",
       icon: '🍩',
       description: 'Match-3 puzzle game with powerups and combos.',
-      onClick: openDonutsMagicWindow
+      onClick: openDonutsMagicWindow,
+      mobileSupported: true
     },
     {
       id: 'irontangle',
       name: 'Iron Tangle',
       icon: '🚂',
       description: 'Connect railway pipes to solve puzzles.',
-      onClick: openIronTangleWindow
+      onClick: openIronTangleWindow,
+      mobileSupported: true
     },
     {
       id: 'minesweeper',
       name: 'Minesweeper',
       icon: '💣',
       description: 'Classic puzzle game. Find all the mines!',
-      onClick: openMinesweeperWindow
+      onClick: openMinesweeperWindow,
+      mobileSupported: true
     },
     {
       id: 'writeflow',
       name: 'WriteFlow',
       icon: '📝',
       description: 'Full-featured text editor with rich formatting.',
-      onClick: openWriteFlowWindow
+      onClick: openWriteFlowWindow,
+      mobileSupported: false // Better on desktop with keyboard
     },
   ]
+
+  // Filter apps for mobile
+  const availableApps = isMobile ? apps.filter(app => app.mobileSupported) : apps
 
   const handleMinimizeFeed = () => {
     setOpenColumns(prev =>
@@ -507,8 +515,33 @@ export default function ColumnsLayout() {
   // Get visible columns (not minimized)
   const visibleColumns = openColumns.filter(col => !col.minimized)
 
+  // Get open games for mobile indicator
+  const openGames = openColumns.filter(col => col.type === 'game' && !col.minimized)
+
   return (
     <div className="columns-layout">
+      {/* Mobile Game Indicators */}
+      {isMobile && openGames.length > 0 && (
+        <div className="mobile-game-indicators">
+          {openGames.map(game => (
+            <div
+              key={game.id}
+              className="game-indicator"
+              onClick={() => closeColumn(game.id)}
+              title={`Close ${game.data.gameName}`}
+            >
+              <span className="game-indicator-icon">
+                {game.data.gameType === 'minesweeper' && '💣'}
+                {game.data.gameType === 'donutsmagic' && '🍩'}
+                {game.data.gameType === 'irontangle' && '🚂'}
+                {game.data.gameType === 'rummikub' && '🎲'}
+                {game.data.gameType === 'writeflow' && '📝'}
+              </span>
+              <span className="game-indicator-close">✕</span>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="main-content">
         <Columns
           visibleColumnCount={visibleColumns.length}
@@ -596,7 +629,7 @@ export default function ColumnsLayout() {
       <AppLauncher
         isOpen={isLauncherOpen}
         onClose={() => setIsLauncherOpen(false)}
-        apps={apps}
+        apps={availableApps}
       />
 
       {/* Theme Preview Window */}
