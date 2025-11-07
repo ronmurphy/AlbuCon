@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { supabase } from '../lib/supabase'
 import PostCard from '../components/PostCard'
+import { contentTypes, defaultPreferences } from '../lib/contentTypes'
 import './Profile.css'
 
 export default function Profile() {
@@ -12,6 +13,8 @@ export default function Profile() {
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({ totalPosts: 0, totalLikes: 0 })
   const [profilePicture, setProfilePicture] = useState(null)
+  const [contentPreferences, setContentPreferences] = useState(defaultPreferences)
+  const [savingPreferences, setSavingPreferences] = useState(false)
 
   const fetchUserPosts = async () => {
     if (!user) return
