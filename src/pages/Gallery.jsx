@@ -18,7 +18,7 @@ export default function Gallery({ userId, username, onImageClick }) {
         .from('user_images')
         .select('*')
         .eq('user_id', userId)
-        .order('uploaded_at', { ascending: false })
+        .order('created_at', { ascending: false })
 
       if (error) throw error
 
@@ -63,20 +63,20 @@ export default function Gallery({ userId, username, onImageClick }) {
           <div
             key={image.id}
             className="gallery-item"
-            onClick={() => onImageClick?.(image.image_url, image.filename || 'Image')}
+            onClick={() => onImageClick?.(image.public_url, 'Gallery Image')}
           >
             <img
-              src={image.image_url}
-              alt={image.filename || 'Gallery image'}
+              src={image.public_url}
+              alt="Gallery image"
               className="gallery-image"
               onError={(e) => {
                 e.target.style.display = 'none'
-                console.error('Failed to load image:', image.image_url)
+                console.error('Failed to load image:', image.public_url)
               }}
             />
             <div className="gallery-item-overlay">
               <span className="gallery-item-date">
-                {new Date(image.uploaded_at).toLocaleDateString()}
+                {new Date(image.created_at).toLocaleDateString()}
               </span>
             </div>
           </div>
