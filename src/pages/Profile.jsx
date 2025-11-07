@@ -4,6 +4,8 @@ import { useTheme } from '../contexts/ThemeContext'
 import { supabase } from '../lib/supabase'
 import PostCard from '../components/PostCard'
 import ConnectedServices from '../components/ConnectedServices'
+import FollowStats from '../components/FollowStats'
+import InviteCodeGenerator from '../components/InviteCodeGenerator'
 import { contentTypes, platformTypes, defaultPreferences } from '../lib/contentTypes'
 import './Profile.css'
 
@@ -138,6 +140,9 @@ export default function Profile() {
         </h1>
         <p className="profile-email">{user?.email}</p>
 
+        {/* Follow Stats */}
+        <FollowStats userId={user?.id} />
+
         <div className="profile-stats">
           <div className="stat">
             <div className="stat-value">{stats.totalPosts}</div>
@@ -243,6 +248,9 @@ export default function Profile() {
 
       {/* Connected Services */}
       <ConnectedServices />
+
+      {/* Invite Friends */}
+      <InviteCodeGenerator />
 
       <div className="profile-posts">
         <h2 className="section-title">Your Posts</h2>

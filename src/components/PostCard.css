@@ -13,6 +13,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex: 1;
 }
 
 .author-avatar {
@@ -139,4 +140,31 @@
 .like-count {
   font-weight: 600;
   min-width: 20px;
+}
+
+.post-delete-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.post-delete-btn:hover:not(:disabled) {
+  background: var(--danger);
+  color: white;
+  transform: scale(1.05);
+}
+
+.post-delete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

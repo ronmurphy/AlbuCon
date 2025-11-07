@@ -1,0 +1,84 @@
+.invite-code-generator {
+  padding: 1.5rem;
+}
+
+.invite-code-generator.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 150px;
+  color: var(--text-secondary);
+}
+
+.invite-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.3rem;
+  color: var(--text-primary);
+}
+
+.invite-description {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+}
+
+.invite-code-display {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.invite-code-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: var(--background);
+  border: 2px solid var(--primary);
+  border-radius: 12px;
+  gap: 1rem;
+}
+
+.invite-code {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  color: var(--primary);
+  letter-spacing: 0.1em;
+}
+
+.invite-uses {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  background: var(--card-background);
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.invite-link-preview {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: var(--background);
+  border-radius: 8px;
+  word-break: break-all;
+}
+
+.invite-link-preview small {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-family: 'Courier New', monospace;
+}
+
+@media (max-width: 768px) {
+  .invite-code-box {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.25rem 1rem;
+  }
+
+  .invite-code {
+    font-size: 1.3rem;
+  }
+}

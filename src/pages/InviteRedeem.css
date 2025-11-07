@@ -1,0 +1,158 @@
+.invite-redeem-page {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.invite-redeem-card {
+  max-width: 500px;
+  width: 100%;
+  padding: 2.5rem;
+  text-align: center;
+}
+
+.loading-spinner {
+  padding: 2rem;
+  color: var(--text-secondary);
+}
+
+/* Error State */
+.invite-redeem-card.error {
+  border: 2px solid var(--danger);
+}
+
+.error-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.invite-redeem-card.error h2 {
+  color: var(--danger);
+  margin: 0 0 1rem 0;
+}
+
+.invite-redeem-card.error p {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+/* Success State */
+.invite-redeem-card.success {
+  border: 2px solid var(--success);
+}
+
+.success-icon {
+  font-size: 4rem;
+  color: var(--success);
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.invite-redeem-card.success h2 {
+  color: var(--success);
+  margin: 0 0 1rem 0;
+}
+
+.redirect-message {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
+/* Invite Header */
+.invite-header {
+  margin-bottom: 2rem;
+}
+
+.inviter-avatar {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 1.5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.inviter-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-initial {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+}
+
+.invite-header h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.8rem;
+  color: var(--text-primary);
+}
+
+.invite-message {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Invite Code Display */
+.invite-code-display {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: var(--background);
+  border: 2px solid var(--primary);
+  border-radius: 12px;
+}
+
+.invite-code {
+  font-size: 2rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  color: var(--primary);
+  letter-spacing: 0.15em;
+}
+
+/* Login Prompt */
+.login-prompt {
+  margin-top: 1.5rem;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.login-prompt a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-prompt a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .invite-redeem-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .invite-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .invite-code {
+    font-size: 1.6rem;
+  }
+
+  .inviter-avatar {
+    width: 80px;
+    height: 80px;
+  }
+}
