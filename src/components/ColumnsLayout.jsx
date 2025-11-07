@@ -364,6 +364,23 @@ export default function ColumnsLayout() {
       return
     }
 
+    // When closing profile, also close user's gallery
+    if (columnId === 'profile') {
+      setOpenColumns(prev => prev.filter(col =>
+        col.id !== columnId && col.id !== `gallery-${user?.id}`
+      ))
+      return
+    }
+
+    // When closing a user timeline, also close that user's gallery
+    if (columnId.startsWith('user-')) {
+      const userId = columnId.replace('user-', '')
+      setOpenColumns(prev => prev.filter(col =>
+        col.id !== columnId && col.id !== `gallery-${userId}`
+      ))
+      return
+    }
+
     setOpenColumns(prev => prev.filter(col => col.id !== columnId))
   }
 
