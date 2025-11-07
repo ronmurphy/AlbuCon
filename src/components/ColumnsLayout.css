@@ -9,7 +9,7 @@
 .main-content {
   flex: 1;
   overflow: hidden;
-  padding-bottom: 100px; /* Space for dock */
+  /* Removed padding-bottom - dock now floats above content */
 }
 
 /* Column Item */
@@ -130,7 +130,7 @@
 /* Mobile adjustments */
 @media (max-width: 768px) {
   .main-content {
-    padding-bottom: 90px;
+    /* Removed padding-bottom - dock floats above on mobile too */
   }
 
   .settings-view {

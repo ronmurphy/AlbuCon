@@ -1,5 +1,5 @@
 .columns-container {
-  height: calc(100vh - 80px - 100px); /* viewport - navbar - dock */
+  height: 100vh; /* Full viewport height - dock now floats above */
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -112,6 +112,8 @@
   display: flex;
   flex-direction: column;
   transition: transform 0.2s ease;
+  /* Add padding at bottom so content isn't hidden by floating dock */
+  padding-bottom: 120px;
 }
 
 .fixed-width .column {
@@ -229,7 +231,7 @@
 /* Mobile adjustments */
 @media (max-width: 768px) {
   .columns-container {
-    height: calc(100vh - 60px - 90px);
+    height: 100vh; /* Full viewport height on mobile too */
   }
 
   .columns-header {
@@ -263,7 +265,7 @@
 
 @media (max-width: 480px) {
   .columns-container {
-    height: calc(100vh - 60px - 80px);
+    height: 100vh; /* Full viewport height on small mobile too */
   }
 
   .column {
