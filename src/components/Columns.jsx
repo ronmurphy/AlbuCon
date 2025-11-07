@@ -6,13 +6,29 @@ export default function Columns({ children, visibleColumnCount, openColumns }) {
   const [isDragging, setIsDragging] = useState(false)
   const [startX, setStartX] = useState(0)
   const [scrollLeft, setScrollLeft] = useState(0)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
   const columnsRef = useRef(null)
+
+  // Update isMobile on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // Filter out null/undefined children (minimized columns)
   const columns = Array.isArray(children) ? children.filter(Boolean) : [children].filter(Boolean)
 
   // Calculate column width based on number of visible columns
   const getColumnWidth = () => {
+    // On mobile, ALWAYS show one column at a time (full width carousel)
+    if (isMobile) {
+      return '100%'
+    }
+
+    // Desktop behavior - side-by-side columns
     if (!visibleColumnCount) return '100%'
 
     if (visibleColumnCount === 1) return '100%'
@@ -24,11 +40,12 @@ export default function Columns({ children, visibleColumnCount, openColumns }) {
   }
 
   const columnWidth = getColumnWidth()
-  const useFixedWidth = visibleColumnCount >= 5
+  const useFixedWidth = !isMobile && visibleColumnCount >= 5
 
   // Touch/Mouse drag scrolling
   const handleMouseDown = (e) => {
-    if (!useFixedWidth) return // Only enable drag for 5+ columns
+    // Enable drag for desktop 5+ columns
+    if (!useFixedWidth && !isMobile) return
     setIsDragging(true)
     setStartX(e.pageX - columnsRef.current.offsetLeft)
     setScrollLeft(columnsRef.current.scrollLeft)
@@ -47,13 +64,15 @@ export default function Columns({ children, visibleColumnCount, openColumns }) {
   }
 
   const handleTouchStart = (e) => {
-    if (!useFixedWidth) return
+    // Enable touch swipe on mobile always, or desktop with 5+ columns
+    if (!isMobile && !useFixedWidth) return
     setStartX(e.touches[0].pageX - columnsRef.current.offsetLeft)
     setScrollLeft(columnsRef.current.scrollLeft)
   }
 
   const handleTouchMove = (e) => {
-    if (!useFixedWidth) return
+    // Enable touch swipe on mobile always, or desktop with 5+ columns
+    if (!isMobile && !useFixedWidth) return
     const x = e.touches[0].pageX - columnsRef.current.offsetLeft
     const walk = (x - startX) * 2
     columnsRef.current.scrollLeft = scrollLeft - walk
@@ -105,7 +124,7 @@ export default function Columns({ children, visibleColumnCount, openColumns }) {
     <div className="columns-container">
       <div
         ref={columnsRef}
-        className={`columns-wrapper ${isDragging ? 'dragging' : ''} ${useFixedWidth ? 'fixed-width' : 'responsive-width'}`}
+        className={`columns-wrapper ${isDragging ? 'dragging' : ''} ${isMobile ? 'mobile-carousel' : useFixedWidth ? 'fixed-width' : 'responsive-width'}`}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
@@ -113,7 +132,7 @@ export default function Columns({ children, visibleColumnCount, openColumns }) {
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         style={{
-          cursor: useFixedWidth ? 'grab' : 'default'
+          cursor: (useFixedWidth || isMobile) ? 'grab' : 'default'
         }}
       >
         {columns.map((column, index) => (
@@ -121,9 +140,9 @@ export default function Columns({ children, visibleColumnCount, openColumns }) {
             key={index}
             className="column"
             style={{
-              flex: useFixedWidth ? 'none' : undefined,
+              flex: (useFixedWidth || isMobile) ? 'none' : undefined,
               minWidth: columnWidth,
-              maxWidth: useFixedWidth ? '400px' : columnWidth,
+              maxWidth: (useFixedWidth || isMobile) ? (isMobile ? columnWidth : '400px') : columnWidth,
               width: columnWidth
             }}
           >

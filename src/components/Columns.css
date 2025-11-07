@@ -67,6 +67,20 @@
   scroll-snap-type: x mandatory;
 }
 
+.columns-wrapper.mobile-carousel {
+  gap: 0;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  /* Hide scrollbar on mobile */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.columns-wrapper.mobile-carousel::-webkit-scrollbar {
+  display: none;
+}
+
 .columns-wrapper.dragging {
   cursor: grabbing;
   scroll-behavior: auto;
