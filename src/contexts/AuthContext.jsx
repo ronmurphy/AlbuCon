@@ -32,10 +32,20 @@ export const AuthProvider = ({ children }) => {
 
   // Sign up with email and password
   const signUp = async (email, password, username) => {
+    // Determine the correct redirect URL based on environment
+    const getEmailRedirectUrl = () => {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return window.location.origin
+      }
+      // For production (GitHub Pages)
+      return `${window.location.origin}${import.meta.env.BASE_URL}`
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo: getEmailRedirectUrl(),
         data: {
           username: username,
         }
