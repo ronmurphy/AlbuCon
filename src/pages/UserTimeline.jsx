@@ -6,7 +6,7 @@ import FilteredPostCard from '../components/FilteredPostCard'
 import { defaultPreferences } from '../lib/contentTypes'
 import './UserTimeline.css'
 
-export default function UserTimeline({ userId, username, profilePicture, onClose, onImageClick, onOpenGallery }) {
+export default function UserTimeline({ userId, username, profilePicture, onClose, onImageClick, onOpenGallery, onOpenDirectMessage }) {
   const { user } = useAuth()
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -122,14 +122,24 @@ export default function UserTimeline({ userId, username, profilePicture, onClose
         </div>
         <h2 className="user-display-name">{username || userProfile?.username || 'Unknown User'}</h2>
         <p className="user-post-count">{posts.length} {posts.length === 1 ? 'post' : 'posts'}</p>
-        {onOpenGallery && (
-          <button
-            className="btn btn-primary view-gallery-btn"
-            onClick={() => onOpenGallery(userId, username || userProfile?.username)}
-          >
-            📷 View Gallery
-          </button>
-        )}
+        <div className="user-actions">
+          {onOpenGallery && (
+            <button
+              className="btn btn-primary"
+              onClick={() => onOpenGallery(userId, username || userProfile?.username)}
+            >
+              📷 Gallery
+            </button>
+          )}
+          {onOpenDirectMessage && (
+            <button
+              className="btn btn-secondary"
+              onClick={() => onOpenDirectMessage(userId, username || userProfile?.username, profilePicture || userProfile?.profile_picture_url)}
+            >
+              💬 Message
+            </button>
+          )}
+        </div>
       </div>
 
       {/* User's Posts */}
