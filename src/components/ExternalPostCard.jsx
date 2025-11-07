@@ -1,4 +1,6 @@
 import VideoPlayer from './VideoPlayer'
+import YouTubeEmbed from './YouTubeEmbed'
+import { extractYouTubeVideoId } from '../utils/youtubeUtils'
 import './ExternalPostCard.css'
 
 const PLATFORM_INFO = {
@@ -100,6 +102,12 @@ export default function ExternalPostCard({ post, onImageClick }) {
           <VideoPlayer src={post.video_url} className="post-video" />
         </div>
       )}
+
+      {/* Display YouTube embed if URL detected in content */}
+      {(() => {
+        const youtubeVideoId = extractYouTubeVideoId(post.content)
+        return youtubeVideoId ? <YouTubeEmbed videoId={youtubeVideoId} /> : null
+      })()}
 
       <div className="post-footer">
         <a
