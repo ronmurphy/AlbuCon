@@ -1,6 +1,66 @@
 import { supabase } from '../lib/supabase'
 
 /**
+ * Check if the Reddit proxy Edge Function is deployed and working
+ * @returns {Promise<{healthy: boolean, message: string}>}
+ */
+export async function checkRedditProxyHealth() {
+  try {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+
+    if (!supabaseUrl || supabaseUrl === 'YOUR_SUPABASE_URL') {
+      return {
+        healthy: false,
+        message: '❌ Supabase URL not configured. Set VITE_SUPABASE_URL in your .env file'
+      }
+    }
+
+    // Test with a minimal Reddit API call
+    const testUrl = 'https://www.reddit.com/r/programming.json?limit=1'
+    const proxyUrl = `${supabaseUrl}/functions/v1/reddit-proxy?url=${encodeURIComponent(testUrl)}`
+
+    const response = await fetch(proxyUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return {
+          healthy: false,
+          message: '❌ Reddit proxy Edge Function not deployed. Run: supabase functions deploy reddit-proxy'
+        }
+      }
+      const errorData = await response.json().catch(() => ({}))
+      return {
+        healthy: false,
+        message: `⚠️ Reddit proxy returned error ${response.status}: ${errorData.error || response.statusText}`
+      }
+    }
+
+    const data = await response.json()
+    if (data.data?.children?.length > 0) {
+      return {
+        healthy: true,
+        message: '✅ Reddit proxy Edge Function is working!'
+      }
+    }
+
+    return {
+      healthy: false,
+      message: '⚠️ Reddit proxy responded but returned no data'
+    }
+  } catch (error) {
+    return {
+      healthy: false,
+      message: `❌ Error checking Reddit proxy: ${error.message}`
+    }
+  }
+}
+
+/**
  * Fetch data from Reddit via Supabase Edge Function proxy
  * This bypasses CORS restrictions by using a server-side proxy
  * @param {string} redditUrl - Full Reddit JSON URL to fetch

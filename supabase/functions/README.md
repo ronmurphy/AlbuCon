@@ -14,6 +14,20 @@ Reddit's JSON API doesn't allow CORS requests from browsers. By using a Supabase
 
 ### Deploying the Edge Function
 
+#### Option 1: GitHub Actions (Recommended)
+
+**Automatic deployment using GitHub Actions!**
+
+See the complete guide: [SUPABASE_SETUP.md](../../SUPABASE_SETUP.md)
+
+This method:
+- ✅ Deploys automatically on merge to main
+- ✅ Can be triggered manually from GitHub Actions tab
+- ✅ No local setup required
+- ✅ Credentials stored securely in GitHub Secrets
+
+#### Option 2: Manual Deployment
+
 1. Install the Supabase CLI:
    ```bash
    npm install -g supabase
