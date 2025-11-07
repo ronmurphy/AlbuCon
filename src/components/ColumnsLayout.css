@@ -9,7 +9,7 @@
 .main-content {
   flex: 1;
   overflow: hidden;
-  padding-bottom: 100px; /* Space for dock */
+  /* Removed padding-bottom - dock now floats above content */
 }
 
 /* Column Item */
@@ -127,10 +127,34 @@
   box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
 }
 
+/* Game Columns (Mobile) */
+.game-column {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.game-container {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: var(--background);
+}
+
+.game-container > * {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+}
+
 /* Mobile adjustments */
 @media (max-width: 768px) {
   .main-content {
-    padding-bottom: 90px;
+    /* Removed padding-bottom - dock floats above on mobile too */
   }
 
   .settings-view {
