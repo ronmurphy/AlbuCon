@@ -8,6 +8,7 @@ import FilteredPostCard from '../components/FilteredPostCard'
 import { defaultPreferences } from '../lib/contentTypes'
 import { fetchAllBlueskyFeeds, getExternalPosts } from '../services/blueskyService'
 import { fetchAllMastodonFeeds } from '../services/mastodonService'
+import { fetchAllRedditFeeds } from '../services/redditService'
 import './Home.css'
 
 export default function Home({ onMinimize, onImageClick }) {
@@ -106,19 +107,21 @@ export default function Home({ onMinimize, onImageClick }) {
 
     setRefreshing(true)
     try {
-      // Fetch from both Bluesky and Mastodon
-      const [blueskyCount, mastodonCount] = await Promise.all([
+      // Fetch from all platforms in parallel
+      const [blueskyCount, mastodonCount, redditCount] = await Promise.all([
         fetchAllBlueskyFeeds(user.id),
-        fetchAllMastodonFeeds(user.id)
+        fetchAllMastodonFeeds(user.id),
+        fetchAllRedditFeeds(user.id)
       ])
 
-      const totalNewPosts = blueskyCount + mastodonCount
+      const totalNewPosts = blueskyCount + mastodonCount + redditCount
 
       if (totalNewPosts > 0) {
         await fetchExternalPosts()
         const platformsMsg = []
         if (blueskyCount > 0) platformsMsg.push(`${blueskyCount} from Bluesky`)
         if (mastodonCount > 0) platformsMsg.push(`${mastodonCount} from Mastodon`)
+        if (redditCount > 0) platformsMsg.push(`${redditCount} from Reddit`)
         alert(`✓ Fetched ${totalNewPosts} new posts! (${platformsMsg.join(', ')})`)
       } else {
         alert('No new posts found')
