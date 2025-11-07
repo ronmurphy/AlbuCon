@@ -142,6 +142,13 @@
   min-width: 20px;
 }
 
+.post-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.post-edit-btn,
 .post-delete-btn {
   background: transparent;
   border: none;
@@ -158,6 +165,12 @@
   min-height: 44px;
 }
 
+.post-edit-btn:hover {
+  background: var(--primary);
+  color: white;
+  transform: scale(1.05);
+}
+
 .post-delete-btn:hover:not(:disabled) {
   background: var(--danger);
   color: white;
@@ -167,4 +180,50 @@
 .post-delete-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.edited-indicator {
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.post-edit-form {
+  margin-bottom: 1rem;
+}
+
+.post-edit-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 1rem;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 0.75rem;
+  background: var(--background);
+  color: var(--text-primary);
+  transition: border-color 0.3s ease;
+}
+
+.post-edit-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.post-edit-textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.post-edit-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
 }

@@ -53,6 +53,11 @@
   margin-bottom: 2rem;
 }
 
+.view-gallery-btn {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
 .profile-stats {
   display: flex;
   justify-content: center;

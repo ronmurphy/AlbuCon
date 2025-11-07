@@ -9,7 +9,7 @@ import InviteCodeGenerator from '../components/InviteCodeGenerator'
 import { contentTypes, platformTypes, defaultPreferences } from '../lib/contentTypes'
 import './Profile.css'
 
-export default function Profile() {
+export default function Profile({ onOpenGallery }) {
   const { user } = useAuth()
   const { currentTheme, openPreview, themes } = useTheme()
   const [posts, setPosts] = useState([])
@@ -142,6 +142,16 @@ export default function Profile() {
 
         {/* Follow Stats */}
         <FollowStats userId={user?.id} />
+
+        {/* View Gallery Button */}
+        {onOpenGallery && (
+          <button
+            className="btn btn-primary view-gallery-btn"
+            onClick={() => onOpenGallery(user?.id, user?.user_metadata?.username)}
+          >
+            📷 View Gallery
+          </button>
+        )}
 
         <div className="profile-stats">
           <div className="stat">

@@ -11,11 +11,23 @@ export default function PostCard({ post, onLikeUpdate, onImageClick, onPostDelet
   const { user } = useAuth()
   const [isLiking, setIsLiking] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editedContent, setEditedContent] = useState(post.content)
+  const [isSaving, setIsSaving] = useState(false)
 
   // Check if current user has liked this post
   const hasLiked = post.likes?.some(like => like.user_id === user?.id)
   const likeCount = post.likes?.length || 0
   const isOwnPost = user?.id === post.user_id
+
+  // Check if post is editable (within 15 minutes of creation)
+  const canEdit = () => {
+    if (!isOwnPost) return false
+    const postTime = new Date(post.created_at)
+    const now = new Date()
+    const minutesSincePost = (now - postTime) / (1000 * 60)
+    return minutesSincePost <= 15
+  }
 
   const handleLike = async () => {
     if (!user || isLiking) return
@@ -46,6 +58,45 @@ export default function PostCard({ post, onLikeUpdate, onImageClick, onPostDelet
       console.error('Error toggling like:', error)
     } finally {
       setIsLiking(false)
+    }
+  }
+
+  const handleEdit = () => {
+    setIsEditing(true)
+    setEditedContent(post.content)
+  }
+
+  const handleCancelEdit = () => {
+    setIsEditing(false)
+    setEditedContent(post.content)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editedContent.trim()) {
+      alert('Post content cannot be empty')
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .update({
+          content: editedContent.trim(),
+          edited_at: new Date().toISOString()
+        })
+        .eq('id', post.id)
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      setIsEditing(false)
+      if (onLikeUpdate) onLikeUpdate() // Refresh to show updated content
+    } catch (error) {
+      console.error('Error updating post:', error)
+      alert('Failed to update post. Please try again.')
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -111,7 +162,10 @@ export default function PostCard({ post, onLikeUpdate, onImageClick, onPostDelet
             <div className="author-name">
               {post.profiles?.username || 'Anonymous'}
             </div>
-            <div className="post-time">{formatDate(post.created_at)}</div>
+            <div className="post-time">
+              {formatDate(post.created_at)}
+              {post.edited_at && <span className="edited-indicator"> (edited)</span>}
+            </div>
           </div>
           {!isOwnPost && (
             <FollowButton
@@ -121,20 +175,59 @@ export default function PostCard({ post, onLikeUpdate, onImageClick, onPostDelet
           )}
         </div>
         {isOwnPost && (
-          <button
-            className="post-delete-btn"
-            onClick={handleDelete}
-            disabled={isDeleting}
-            title="Delete post"
-          >
-            {isDeleting ? '...' : '🗑️'}
-          </button>
+          <div className="post-actions">
+            {canEdit() && !isEditing && (
+              <button
+                className="post-edit-btn"
+                onClick={handleEdit}
+                title="Edit post (within 15 minutes)"
+              >
+                ✏️
+              </button>
+            )}
+            <button
+              className="post-delete-btn"
+              onClick={handleDelete}
+              disabled={isDeleting}
+              title="Delete post"
+            >
+              {isDeleting ? '...' : '🗑️'}
+            </button>
+          </div>
         )}
       </div>
 
-      <div className="post-content">
-        {post.content}
-      </div>
+      {isEditing ? (
+        <div className="post-edit-form">
+          <textarea
+            className="post-edit-textarea"
+            value={editedContent}
+            onChange={(e) => setEditedContent(e.target.value)}
+            disabled={isSaving}
+            placeholder="Edit your post..."
+          />
+          <div className="post-edit-actions">
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={handleCancelEdit}
+              disabled={isSaving}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={handleSaveEdit}
+              disabled={isSaving || !editedContent.trim()}
+            >
+              {isSaving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="post-content">
+          {post.content}
+        </div>
+      )}
 
       {/* Display image if present */}
       {post.image_url && (
