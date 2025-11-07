@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { ThemeProvider } from './contexts/ThemeContext'
 import Navbar from './components/Navbar'
 import ColumnsLayout from './components/ColumnsLayout'
 import Login from './pages/Login'
@@ -26,11 +27,13 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router basename={import.meta.env.BASE_URL}>
-        <AppContent />
-      </Router>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Router basename={import.meta.env.BASE_URL}>
+          <AppContent />
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }
 

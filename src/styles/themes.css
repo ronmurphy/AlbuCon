@@ -1,0 +1,326 @@
+/* Theme System - CSS Variables */
+
+/* Base theme structure - all themes follow this pattern */
+:root {
+  /* Will be overridden by specific themes */
+}
+
+/* ==================== DARK MODE (Default) ==================== */
+[data-theme="dark"] {
+  /* Backgrounds */
+  --background: #0f172a;
+  --surface: #1e293b;
+  --surface-hover: #334155;
+
+  /* Text */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+
+  /* Brand Colors */
+  --primary: #8b5cf6;
+  --primary-hover: #7c3aed;
+  --secondary: #ec4899;
+  --accent: #06b6d4;
+
+  /* Semantic Colors */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #3b82f6;
+
+  /* Borders & Dividers */
+  --border: #334155;
+  --border-light: #475569;
+
+  /* Shadows */
+  --shadow: rgba(0, 0, 0, 0.3);
+  --shadow-lg: rgba(0, 0, 0, 0.5);
+}
+
+/* ==================== LIGHT MODE ==================== */
+[data-theme="light"] {
+  /* Backgrounds */
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --surface-hover: #f1f5f9;
+
+  /* Text */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+
+  /* Brand Colors */
+  --primary: #7c3aed;
+  --primary-hover: #6d28d9;
+  --secondary: #db2777;
+  --accent: #0891b2;
+
+  /* Semantic Colors */
+  --success: #059669;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --info: #2563eb;
+
+  /* Borders & Dividers */
+  --border: #e2e8f0;
+  --border-light: #cbd5e1;
+
+  /* Shadows */
+  --shadow: rgba(0, 0, 0, 0.1);
+  --shadow-lg: rgba(0, 0, 0, 0.15);
+}
+
+/* ==================== MIDNIGHT ==================== */
+[data-theme="midnight"] {
+  /* Pure black for OLED screens */
+  --background: #000000;
+  --surface: #0a0a0a;
+  --surface-hover: #1a1a1a;
+
+  /* Text */
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-tertiary: #71717a;
+
+  /* Brand Colors */
+  --primary: #a78bfa;
+  --primary-hover: #8b5cf6;
+  --secondary: #f472b6;
+  --accent: #22d3ee;
+
+  /* Semantic Colors */
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --info: #60a5fa;
+
+  /* Borders & Dividers */
+  --border: #27272a;
+  --border-light: #3f3f46;
+
+  /* Shadows */
+  --shadow: rgba(0, 0, 0, 0.8);
+  --shadow-lg: rgba(0, 0, 0, 0.9);
+}
+
+/* ==================== OCEAN ==================== */
+[data-theme="ocean"] {
+  /* Deep blue ocean vibes */
+  --background: #0c1e33;
+  --surface: #143754;
+  --surface-hover: #1e4d6e;
+
+  /* Text */
+  --text-primary: #e0f2fe;
+  --text-secondary: #7dd3fc;
+  --text-tertiary: #38bdf8;
+
+  /* Brand Colors */
+  --primary: #0ea5e9;
+  --primary-hover: #0284c7;
+  --secondary: #06b6d4;
+  --accent: #22d3ee;
+
+  /* Semantic Colors */
+  --success: #14b8a6;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #3b82f6;
+
+  /* Borders & Dividers */
+  --border: #1e4d6e;
+  --border-light: #2563a0;
+
+  /* Shadows */
+  --shadow: rgba(6, 24, 44, 0.4);
+  --shadow-lg: rgba(6, 24, 44, 0.65);
+}
+
+/* ==================== FOREST ==================== */
+[data-theme="forest"] {
+  /* Natural green forest theme */
+  --background: #0a1f0f;
+  --surface: #153320;
+  --surface-hover: #1f4730;
+
+  /* Text */
+  --text-primary: #d1fae5;
+  --text-secondary: #6ee7b7;
+  --text-tertiary: #34d399;
+
+  /* Brand Colors */
+  --primary: #10b981;
+  --primary-hover: #059669;
+  --secondary: #22c55e;
+  --accent: #84cc16;
+
+  /* Semantic Colors */
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #06b6d4;
+
+  /* Borders & Dividers */
+  --border: #1f4730;
+  --border-light: #2d5a42;
+
+  /* Shadows */
+  --shadow: rgba(10, 31, 15, 0.4);
+  --shadow-lg: rgba(10, 31, 15, 0.65);
+}
+
+/* ==================== SUNSET ==================== */
+[data-theme="sunset"] {
+  /* Warm sunset colors */
+  --background: #1f0f1a;
+  --surface: #3d1a2d;
+  --surface-hover: #5a263f;
+
+  /* Text */
+  --text-primary: #fef3c7;
+  --text-secondary: #fcd34d;
+  --text-tertiary: #fbbf24;
+
+  /* Brand Colors */
+  --primary: #f59e0b;
+  --primary-hover: #d97706;
+  --secondary: #ec4899;
+  --accent: #f97316;
+
+  /* Semantic Colors */
+  --success: #10b981;
+  --warning: #eab308;
+  --danger: #ef4444;
+  --info: #8b5cf6;
+
+  /* Borders & Dividers */
+  --border: #5a263f;
+  --border-light: #7c2d54;
+
+  /* Shadows */
+  --shadow: rgba(31, 15, 26, 0.4);
+  --shadow-lg: rgba(31, 15, 26, 0.65);
+}
+
+/* ==================== CYBERPUNK ==================== */
+[data-theme="cyberpunk"] {
+  /* Neon cyberpunk aesthetic */
+  --background: #0d0221;
+  --surface: #190b3a;
+  --surface-hover: #2d1b5e;
+
+  /* Text */
+  --text-primary: #f0abfc;
+  --text-secondary: #e879f9;
+  --text-tertiary: #d946ef;
+
+  /* Brand Colors */
+  --primary: #d946ef;
+  --primary-hover: #c026d3;
+  --secondary: #06b6d4;
+  --accent: #22d3ee;
+
+  /* Semantic Colors */
+  --success: #22d3ee;
+  --warning: #fbbf24;
+  --danger: #ef4444;
+  --info: #8b5cf6;
+
+  /* Borders & Dividers */
+  --border: #2d1b5e;
+  --border-light: #4c1d95;
+
+  /* Shadows */
+  --shadow: rgba(13, 2, 33, 0.4);
+  --shadow-lg: rgba(13, 2, 33, 0.65);
+}
+
+/* ==================== RETRO ==================== */
+[data-theme="retro"] {
+  /* 90s nostalgic colors */
+  --background: #2d2d44;
+  --surface: #3e3e5e;
+  --surface-hover: #4f4f72;
+
+  /* Text */
+  --text-primary: #fef3c7;
+  --text-secondary: #fcd34d;
+  --text-tertiary: #fbbf24;
+
+  /* Brand Colors */
+  --primary: #fb923c;
+  --primary-hover: #f97316;
+  --secondary: #f472b6;
+  --accent: #a78bfa;
+
+  /* Semantic Colors */
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --info: #60a5fa;
+
+  /* Borders & Dividers */
+  --border: #4f4f72;
+  --border-light: #606086;
+
+  /* Shadows */
+  --shadow: rgba(45, 45, 68, 0.4);
+  --shadow-lg: rgba(45, 45, 68, 0.65);
+}
+
+/* ==================== NORD ==================== */
+[data-theme="nord"] {
+  /* Nord color palette - cool and elegant */
+  --background: #2e3440;
+  --surface: #3b4252;
+  --surface-hover: #434c5e;
+
+  /* Text */
+  --text-primary: #eceff4;
+  --text-secondary: #d8dee9;
+  --text-tertiary: #8fbcbb;
+
+  /* Brand Colors */
+  --primary: #88c0d0;
+  --primary-hover: #81a1c1;
+  --secondary: #b48ead;
+  --accent: #5e81ac;
+
+  /* Semantic Colors */
+  --success: #a3be8c;
+  --warning: #ebcb8b;
+  --danger: #bf616a;
+  --info: #81a1c1;
+
+  /* Borders & Dividers */
+  --border: #434c5e;
+  --border-light: #4c566a;
+
+  /* Shadows */
+  --shadow: rgba(46, 52, 64, 0.4);
+  --shadow-lg: rgba(46, 52, 64, 0.65);
+}
+
+/* Default theme */
+:root {
+  /* Start with dark theme as default */
+  --background: #0f172a;
+  --surface: #1e293b;
+  --surface-hover: #334155;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --primary: #8b5cf6;
+  --primary-hover: #7c3aed;
+  --secondary: #ec4899;
+  --accent: #06b6d4;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #3b82f6;
+  --border: #334155;
+  --border-light: #475569;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --shadow-lg: rgba(0, 0, 0, 0.5);
+}

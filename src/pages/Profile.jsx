@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { useTheme } from '../contexts/ThemeContext'
 import { supabase } from '../lib/supabase'
 import PostCard from '../components/PostCard'
 import './Profile.css'
 
 export default function Profile() {
   const { user } = useAuth()
+  const { currentTheme, changeTheme, themes } = useTheme()
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({ totalPosts: 0, totalLikes: 0 })
@@ -109,6 +111,35 @@ export default function Profile() {
             <div className="stat-value">{stats.totalLikes}</div>
             <div className="stat-label">Likes Received</div>
           </div>
+        </div>
+      </div>
+
+      {/* Theme Selector */}
+      <div className="theme-section card">
+        <h2 className="section-title">Theme</h2>
+        <p className="section-description">Choose your preferred color theme</p>
+        <div className="theme-grid">
+          {themes.map((theme) => (
+            <button
+              key={theme.id}
+              className={`theme-option ${currentTheme === theme.id ? 'active' : ''}`}
+              onClick={() => changeTheme(theme.id)}
+              title={theme.description}
+            >
+              <div className="theme-preview" style={{
+                background: `linear-gradient(135deg, ${theme.preview.bg} 0%, ${theme.preview.accent} 100%)`
+              }}>
+                <span className="theme-icon">{theme.icon}</span>
+              </div>
+              <div className="theme-info">
+                <div className="theme-name">{theme.name}</div>
+                <div className="theme-description">{theme.description}</div>
+              </div>
+              {currentTheme === theme.id && (
+                <div className="theme-check">✓</div>
+              )}
+            </button>
+          ))}
         </div>
       </div>
 
