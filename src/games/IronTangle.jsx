@@ -1,9 +1,9 @@
-export default function Minesweeper() {
+export default function IronTangle() {
   const baseUrl = import.meta.env.BASE_URL
 
   return (
     <iframe
-      src={`${baseUrl}minesweeper.html`}
+      src={`${baseUrl}ironTangle/ironTangle.html`}
       style={{
         width: '100%',
         height: '100%',
@@ -11,7 +11,7 @@ export default function Minesweeper() {
         display: 'block',
         background: 'transparent'
       }}
-      title="Minesweeper Game"
+      title="Iron Tangle Railway"
       sandbox="allow-scripts allow-same-origin allow-forms"
     />
   )
