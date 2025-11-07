@@ -27,7 +27,8 @@ serve(async (req) => {
 
     // Validate that it's a Reddit URL
     if (!redditUrl.startsWith('https://www.reddit.com/') &&
-        !redditUrl.startsWith('https://reddit.com/')) {
+        !redditUrl.startsWith('https://reddit.com/') &&
+        !redditUrl.startsWith('https://old.reddit.com/')) {
       return new Response(
         JSON.stringify({ error: 'Invalid Reddit URL' }),
         {
@@ -37,12 +38,19 @@ serve(async (req) => {
       )
     }
 
+    // Use old.reddit.com which is less strict about blocking
+    const proxyUrl = redditUrl.replace('https://www.reddit.com/', 'https://old.reddit.com/')
+                                .replace('https://reddit.com/', 'https://old.reddit.com/')
+
     // Fetch from Reddit with proper headers
-    const response = await fetch(redditUrl, {
+    // Reddit requires a descriptive User-Agent with contact info
+    const response = await fetch(proxyUrl, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'User-Agent': 'AlbuCon:v1.0.0 (by /u/sphere_social_app)',
+        'User-Agent': 'web:AlbuCon:v1.0.0 (by /u/sphere_social_app)',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Cache-Control': 'no-cache',
       },
     })
 
