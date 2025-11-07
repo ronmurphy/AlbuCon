@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { supabase } from '../lib/supabase'
 import PostCard from '../components/PostCard'
+import ConnectedServices from '../components/ConnectedServices'
 import { contentTypes, defaultPreferences } from '../lib/contentTypes'
 import './Profile.css'
 
@@ -208,6 +209,9 @@ export default function Profile() {
           💡 Hidden content will show as placeholders like "A post was shared (Political)"
         </p>
       </div>
+
+      {/* Connected Services */}
+      <ConnectedServices />
 
       <div className="profile-posts">
         <h2 className="section-title">Your Posts</h2>

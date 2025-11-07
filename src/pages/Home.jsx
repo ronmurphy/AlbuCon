@@ -3,14 +3,18 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import CreatePost from '../components/CreatePost'
 import PostCard from '../components/PostCard'
+import ExternalPostCard from '../components/ExternalPostCard'
 import FilteredPostCard from '../components/FilteredPostCard'
 import { defaultPreferences } from '../lib/contentTypes'
+import { fetchAllBlueskyFeeds, getExternalPosts } from '../services/blueskyService'
 import './Home.css'
 
 export default function Home({ onMinimize, onImageClick }) {
   const { user } = useAuth()
   const [posts, setPosts] = useState([])
+  const [externalPosts, setExternalPosts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [contentPreferences, setContentPreferences] = useState(defaultPreferences)
 
   const fetchPosts = async () => {
@@ -85,8 +89,57 @@ export default function Home({ onMinimize, onImageClick }) {
     }
   }
 
+  const fetchExternalPosts = async () => {
+    if (!user) return
+
+    try {
+      const data = await getExternalPosts(user.id, 50)
+      setExternalPosts(data || [])
+    } catch (error) {
+      console.error('Error fetching external posts:', error)
+    }
+  }
+
+  const refreshFeeds = async () => {
+    if (!user || refreshing) return
+
+    setRefreshing(true)
+    try {
+      const newPostsCount = await fetchAllBlueskyFeeds(user.id)
+      if (newPostsCount > 0) {
+        await fetchExternalPosts()
+        alert(`✓ Fetched ${newPostsCount} new posts from Bluesky!`)
+      } else {
+        alert('No new posts found')
+      }
+    } catch (error) {
+      console.error('Error refreshing feeds:', error)
+      alert('Failed to refresh feeds. Please try again.')
+    } finally {
+      setRefreshing(false)
+    }
+  }
+
+  // Merge and sort all posts by date
+  const getAllPosts = () => {
+    const internalPosts = posts.map(p => ({ ...p, type: 'internal' }))
+    const external = externalPosts.map(p => ({ ...p, type: 'external' }))
+
+    const combined = [...internalPosts, ...external]
+
+    // Sort by date (newest first)
+    combined.sort((a, b) => {
+      const dateA = new Date(a.type === 'internal' ? a.created_at : a.posted_at)
+      const dateB = new Date(b.type === 'internal' ? b.created_at : b.posted_at)
+      return dateB - dateA
+    })
+
+    return combined
+  }
+
   useEffect(() => {
     fetchPosts()
+    fetchExternalPosts()
     loadUserPreferences()
   }, [user])
 
@@ -97,6 +150,8 @@ export default function Home({ onMinimize, onImageClick }) {
       </div>
     )
   }
+
+  const allPosts = getAllPosts()
 
   return (
     <div className="container home-page">
@@ -112,23 +167,55 @@ export default function Home({ onMinimize, onImageClick }) {
 
       <CreatePost onPostCreated={fetchPosts} />
 
+      {/* Refresh Feeds Button */}
+      <div className="feed-controls">
+        <button
+          className="refresh-feeds-btn"
+          onClick={refreshFeeds}
+          disabled={refreshing}
+          title="Fetch latest posts from connected services"
+        >
+          {refreshing ? '🔄 Refreshing...' : '🔄 Refresh Feeds'}
+        </button>
+        {externalPosts.length > 0 && (
+          <span className="external-posts-count">
+            {externalPosts.length} post{externalPosts.length !== 1 ? 's' : ''} from external services
+          </span>
+        )}
+      </div>
+
       <div className="feed">
-        {posts.length === 0 ? (
+        {allPosts.length === 0 ? (
           <div className="empty-feed card">
             <p>No posts yet. Be the first to share something positive! 🌟</p>
+            <p style={{ marginTop: '1rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+              Or add a Bluesky user in your Profile → Connected Services
+            </p>
           </div>
         ) : (
-          posts.map((post) => {
+          allPosts.map((post) => {
             const contentType = post.content_type || 'general'
             const isVisible = contentPreferences[contentType]
 
             if (!isVisible) {
-              return <FilteredPostCard key={post.id} contentType={contentType} />
+              return <FilteredPostCard key={`${post.type}-${post.id}`} contentType={contentType} />
             }
 
+            // Render external posts differently
+            if (post.type === 'external') {
+              return (
+                <ExternalPostCard
+                  key={`external-${post.id}`}
+                  post={post}
+                  onImageClick={onImageClick}
+                />
+              )
+            }
+
+            // Render internal posts normally
             return (
               <PostCard
-                key={post.id}
+                key={`internal-${post.id}`}
                 post={post}
                 onLikeUpdate={fetchPosts}
                 onImageClick={onImageClick}
