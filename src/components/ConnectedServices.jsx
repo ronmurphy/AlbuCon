@@ -28,14 +28,15 @@ export default function ConnectedServices() {
       placeholder: 'user@mastodon.social',
       enabled: true
     },
-    {
-      id: 'reddit',
-      name: 'Reddit',
-      icon: '🤖',
-      description: 'Follow Reddit users or subreddits (no login required)',
-      placeholder: 'u/username or r/subreddit',
-      enabled: true
-    }
+    // Reddit integration disabled due to API blocking
+    // {
+    //   id: 'reddit',
+    //   name: 'Reddit',
+    //   icon: '🤖',
+    //   description: 'Follow Reddit users or subreddits (no login required)',
+    //   placeholder: 'u/username or r/subreddit',
+    //   enabled: true
+    // }
   ]
 
   useEffect(() => {
@@ -80,13 +81,15 @@ export default function ConnectedServices() {
         } else if (formattedHandle.startsWith('@')) {
           formattedHandle = formattedHandle.substring(1) // Remove leading @
         }
-      } else if (selectedPlatform === 'reddit') {
-        // For Reddit, ensure format is u/username or r/subreddit
-        if (!formattedHandle.startsWith('u/') && !formattedHandle.startsWith('r/')) {
-          // Default to user if no prefix
-          formattedHandle = `u/${formattedHandle}`
-        }
       }
+      // Reddit integration disabled
+      // else if (selectedPlatform === 'reddit') {
+      //   // For Reddit, ensure format is u/username or r/subreddit
+      //   if (!formattedHandle.startsWith('u/') && !formattedHandle.startsWith('r/')) {
+      //     // Default to user if no prefix
+      //     formattedHandle = `u/${formattedHandle}`
+      //   }
+      // }
 
       const { data, error } = await supabase
         .from('followed_accounts')

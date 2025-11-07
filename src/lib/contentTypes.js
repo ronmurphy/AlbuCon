@@ -46,13 +46,14 @@ export const platformTypes = [
     description: 'Posts from Mastodon users',
     color: '#6364ff'
   },
-  {
-    id: 'platform_reddit',
-    name: 'Reddit',
-    icon: '🤖',
-    description: 'Posts from Reddit',
-    color: '#ff4500'
-  }
+  // Reddit integration disabled due to API blocking
+  // {
+  //   id: 'platform_reddit',
+  //   name: 'Reddit',
+  //   icon: '🤖',
+  //   description: 'Posts from Reddit',
+  //   color: '#ff4500'
+  // }
 ]
 
 export const defaultPreferences = {
@@ -63,7 +64,7 @@ export const defaultPreferences = {
   // Platform preferences (show external posts by default)
   platform_bluesky: true,
   platform_mastodon: true,
-  platform_reddit: true
+  // platform_reddit: true // Reddit integration disabled
 }
 
 export const getContentType = (typeId) => {
