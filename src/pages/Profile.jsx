@@ -4,7 +4,7 @@ import { useTheme } from '../contexts/ThemeContext'
 import { supabase } from '../lib/supabase'
 import PostCard from '../components/PostCard'
 import ConnectedServices from '../components/ConnectedServices'
-import { contentTypes, defaultPreferences } from '../lib/contentTypes'
+import { contentTypes, platformTypes, defaultPreferences } from '../lib/contentTypes'
 import './Profile.css'
 
 export default function Profile() {
@@ -207,6 +207,37 @@ export default function Profile() {
         </div>
         <p className="preferences-note">
           💡 Hidden content will show as placeholders like "A post was shared (Political)"
+        </p>
+      </div>
+
+      {/* Platform Preferences */}
+      <div className="content-preferences-section card">
+        <h2 className="section-title">Platform Filtering</h2>
+        <p className="section-description">Choose which external platforms you want to see posts from</p>
+        <div className="preferences-grid">
+          {platformTypes.map((type) => (
+            <button
+              key={type.id}
+              className={`preference-option ${contentPreferences[type.id] ? 'enabled' : 'disabled'}`}
+              onClick={() => toggleContentType(type.id)}
+              disabled={savingPreferences}
+              title={type.description}
+            >
+              <div className="preference-icon" style={{ color: type.color }}>
+                {type.icon}
+              </div>
+              <div className="preference-info">
+                <div className="preference-name">{type.name}</div>
+                <div className="preference-description">{type.description}</div>
+              </div>
+              <div className="preference-toggle">
+                {contentPreferences[type.id] ? '✓ Visible' : '✕ Hidden'}
+              </div>
+            </button>
+          ))}
+        </div>
+        <p className="preferences-note">
+          💡 Hide posts from specific platforms. You can still follow accounts, but won't see their posts.
         </p>
       </div>
 

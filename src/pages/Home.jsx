@@ -195,14 +195,39 @@ export default function Home({ onMinimize, onImageClick }) {
         ) : (
           allPosts.map((post) => {
             const contentType = post.content_type || 'general'
-            const isVisible = contentPreferences[contentType]
+            const isContentVisible = contentPreferences[contentType]
 
-            if (!isVisible) {
+            // Check content type visibility
+            if (!isContentVisible) {
               return <FilteredPostCard key={`${post.type}-${post.id}`} contentType={contentType} />
             }
 
-            // Render external posts differently
+            // For external posts, also check platform filtering
             if (post.type === 'external') {
+              const platformKey = `platform_${post.platform}`
+              const isPlatformVisible = contentPreferences[platformKey] !== false
+
+              // If platform is hidden, show filtered card
+              if (!isPlatformVisible) {
+                return (
+                  <div key={`filtered-platform-${post.id}`} className="filtered-post-card card">
+                    <div className="filtered-content">
+                      <span className="filtered-icon">🔇</span>
+                      <div className="filtered-text">
+                        <p className="filtered-message">
+                          Post from {post.platform} hidden
+                        </p>
+                        <p className="filtered-hint">
+                          You've chosen not to see posts from {post.platform}.
+                          <br />
+                          Change this in your Profile → Platform Filtering.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )
+              }
+
               return (
                 <ExternalPostCard
                   key={`external-${post.id}`}
