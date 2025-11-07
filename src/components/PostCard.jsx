@@ -3,6 +3,8 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import CommentsSection from './CommentsSection'
 import FollowButton from './FollowButton'
+import YouTubeEmbed from './YouTubeEmbed'
+import { extractYouTubeVideoId } from '../utils/youtubeUtils'
 import './PostCard.css'
 
 export default function PostCard({ post, onLikeUpdate, onImageClick, onPostDeleted }) {
@@ -152,6 +154,12 @@ export default function PostCard({ post, onLikeUpdate, onImageClick, onPostDelet
           />
         </div>
       )}
+
+      {/* Display YouTube embed if URL detected in content */}
+      {(() => {
+        const youtubeVideoId = extractYouTubeVideoId(post.content)
+        return youtubeVideoId ? <YouTubeEmbed videoId={youtubeVideoId} /> : null
+      })()}
 
       <div className="post-footer">
         <button
