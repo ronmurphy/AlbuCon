@@ -36,6 +36,17 @@ export default function ColumnsLayout() {
   // App launcher state
   const [isLauncherOpen, setIsLauncherOpen] = useState(false)
 
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   const handleSignOut = async () => {
     await signOut()
   }
@@ -82,7 +93,22 @@ export default function ColumnsLayout() {
   }
 
   const openRummikubWindow = () => {
-    // Check if Rummikub window is already open
+    // On mobile, open as column instead of floating window
+    if (isMobile) {
+      // Check if already open as column
+      const exists = openColumns.find(col => col.id === 'game-rummikub')
+      if (exists) return
+
+      // Show warning if screen too small for Rummikub
+      if (window.innerWidth < 600) {
+        alert('⚠️ Rummikub works best on larger screens! Consider playing on desktop for the full experience.')
+      }
+
+      openColumn('game', { gameType: 'rummikub', gameName: 'Rummikub' })
+      return
+    }
+
+    // Desktop: Check if Rummikub window is already open
     const exists = floatingWindows.find(w => w.type === 'rummikub')
     if (exists) {
       focusFloatingWindow(exists.id)
@@ -106,7 +132,15 @@ export default function ColumnsLayout() {
   }
 
   const openMinesweeperWindow = () => {
-    // Check if Minesweeper window is already open
+    // On mobile, open as column
+    if (isMobile) {
+      const exists = openColumns.find(col => col.id === 'game-minesweeper')
+      if (exists) return
+      openColumn('game', { gameType: 'minesweeper', gameName: 'Minesweeper' })
+      return
+    }
+
+    // Desktop: Check if Minesweeper window is already open
     const exists = floatingWindows.find(w => w.type === 'minesweeper')
     if (exists) {
       focusFloatingWindow(exists.id)
@@ -130,7 +164,15 @@ export default function ColumnsLayout() {
   }
 
   const openWriteFlowWindow = () => {
-    // Check if WriteFlow window is already open
+    // On mobile, open as column
+    if (isMobile) {
+      const exists = openColumns.find(col => col.id === 'game-writeflow')
+      if (exists) return
+      openColumn('game', { gameType: 'writeflow', gameName: 'WriteFlow' })
+      return
+    }
+
+    // Desktop: Check if WriteFlow window is already open
     const exists = floatingWindows.find(w => w.type === 'writeflow')
     if (exists) {
       focusFloatingWindow(exists.id)
@@ -154,7 +196,15 @@ export default function ColumnsLayout() {
   }
 
   const openDonutsMagicWindow = () => {
-    // Check if Donut's Magic window is already open
+    // On mobile, open as column
+    if (isMobile) {
+      const exists = openColumns.find(col => col.id === 'game-donutsmagic')
+      if (exists) return
+      openColumn('game', { gameType: 'donutsmagic', gameName: "Donut's Magic" })
+      return
+    }
+
+    // Desktop: Check if Donut's Magic window is already open
     const exists = floatingWindows.find(w => w.type === 'donutsmagic')
     if (exists) {
       focusFloatingWindow(exists.id)
@@ -178,7 +228,15 @@ export default function ColumnsLayout() {
   }
 
   const openIronTangleWindow = () => {
-    // Check if Iron Tangle window is already open
+    // On mobile, open as column
+    if (isMobile) {
+      const exists = openColumns.find(col => col.id === 'game-irontangle')
+      if (exists) return
+      openColumn('game', { gameType: 'irontangle', gameName: 'Iron Tangle' })
+      return
+    }
+
+    // Desktop: Check if Iron Tangle window is already open
     const exists = floatingWindows.find(w => w.type === 'irontangle')
     if (exists) {
       focusFloatingWindow(exists.id)
@@ -262,7 +320,13 @@ export default function ColumnsLayout() {
   }
 
   const openColumn = (type, data = null) => {
-    const columnId = type === 'user' ? `user-${data.userId}` : type
+    // Generate column ID based on type
+    let columnId = type
+    if (type === 'user') {
+      columnId = `user-${data.userId}`
+    } else if (type === 'game') {
+      columnId = `game-${data.gameType}`
+    }
 
     // Check if column already exists
     const exists = openColumns.find(col => col.id === columnId)
@@ -408,6 +472,29 @@ export default function ColumnsLayout() {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        )
+
+      case 'game':
+        return (
+          <div key={column.id} className="column-item game-column">
+            <div className="column-header">
+              <h2 className="column-title">{column.data.gameName}</h2>
+              <button
+                className="close-column-btn"
+                onClick={() => closeColumn(column.id)}
+                title="Close game"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="game-container">
+              {column.data.gameType === 'rummikub' && <RummikubGame />}
+              {column.data.gameType === 'minesweeper' && <Minesweeper />}
+              {column.data.gameType === 'writeflow' && <WriteFlow />}
+              {column.data.gameType === 'donutsmagic' && <DonutsMagic />}
+              {column.data.gameType === 'irontangle' && <IronTangle />}
             </div>
           </div>
         )
