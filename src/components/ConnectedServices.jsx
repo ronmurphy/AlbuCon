@@ -32,9 +32,9 @@ export default function ConnectedServices() {
       id: 'reddit',
       name: 'Reddit',
       icon: '🤖',
-      description: 'Coming soon',
-      placeholder: 'u/username',
-      enabled: false
+      description: 'Follow Reddit users or subreddits (no login required)',
+      placeholder: 'u/username or r/subreddit',
+      enabled: true
     }
   ]
 
@@ -79,6 +79,12 @@ export default function ConnectedServices() {
           formattedHandle = `${formattedHandle}@mastodon.social`
         } else if (formattedHandle.startsWith('@')) {
           formattedHandle = formattedHandle.substring(1) // Remove leading @
+        }
+      } else if (selectedPlatform === 'reddit') {
+        // For Reddit, ensure format is u/username or r/subreddit
+        if (!formattedHandle.startsWith('u/') && !formattedHandle.startsWith('r/')) {
+          // Default to user if no prefix
+          formattedHandle = `u/${formattedHandle}`
         }
       }
 
