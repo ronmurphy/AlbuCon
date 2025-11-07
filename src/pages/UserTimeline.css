@@ -82,8 +82,17 @@
   color: var(--text-secondary);
 }
 
-.user-header .view-gallery-btn {
+.user-actions {
+  display: flex;
+  gap: 0.5rem;
   margin-top: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.user-actions .btn {
+  flex: 1;
+  min-width: 120px;
 }
 
 .user-feed {

@@ -9,6 +9,8 @@ import Profile from '../pages/Profile'
 import MyImages from '../pages/MyImages'
 import UserTimeline from '../pages/UserTimeline'
 import Gallery from '../pages/Gallery'
+import Conversations from '../pages/Conversations'
+import DirectMessages from '../pages/DirectMessages'
 import FloatingWindow from './FloatingWindow'
 import ImageViewer from './ImageViewer'
 import ThemePreview from './ThemePreview'
@@ -337,6 +339,8 @@ export default function ColumnsLayout() {
       columnId = `game-${data.gameType}`
     } else if (type === 'gallery') {
       columnId = `gallery-${data.userId}`
+    } else if (type === 'dm') {
+      columnId = `dm-${data.recipientId}`
     }
 
     // Check if column already exists
@@ -471,6 +475,9 @@ export default function ColumnsLayout() {
               onOpenGallery={(userId, username) => {
                 openColumn('gallery', { userId, username })
               }}
+              onOpenDirectMessage={(recipientId, recipientUsername, recipientProfilePicture) => {
+                openColumn('dm', { recipientId, recipientUsername, recipientProfilePicture })
+              }}
             />
           </div>
         )
@@ -492,6 +499,48 @@ export default function ColumnsLayout() {
               userId={column.data.userId}
               username={column.data.username}
               onImageClick={openImageWindow}
+            />
+          </div>
+        )
+
+      case 'messages':
+        return (
+          <div key={column.id} className="column-item">
+            <div className="column-header">
+              <h2 className="column-title">Messages</h2>
+              <button
+                className="close-column-btn"
+                onClick={() => closeColumn(column.id)}
+                title="Close column"
+              >
+                ✕
+              </button>
+            </div>
+            <Conversations
+              onOpenConversation={(recipientId, recipientUsername, recipientProfilePicture) => {
+                openColumn('dm', { recipientId, recipientUsername, recipientProfilePicture })
+              }}
+            />
+          </div>
+        )
+
+      case 'dm':
+        return (
+          <div key={column.id} className="column-item">
+            <div className="column-header">
+              <h2 className="column-title">💬 {column.data.recipientUsername || 'Direct Message'}</h2>
+              <button
+                className="close-column-btn"
+                onClick={() => closeColumn(column.id)}
+                title="Close column"
+              >
+                ✕
+              </button>
+            </div>
+            <DirectMessages
+              recipientId={column.data.recipientId}
+              recipientUsername={column.data.recipientUsername}
+              recipientProfilePicture={column.data.recipientProfilePicture}
             />
           </div>
         )
