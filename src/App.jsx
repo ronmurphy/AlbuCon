@@ -8,7 +8,7 @@ import ColumnsLayout from './components/ColumnsLayout'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import InviteRedeem from './pages/InviteRedeem'
-import { checkRedditProxyHealth } from './services/redditService'
+// import { checkRedditProxyHealth } from './services/redditService' // Disabled: Reddit integration disabled
 
 function AppContent() {
   const { user } = useAuth()
@@ -33,15 +33,16 @@ function AppContent() {
 }
 
 function App() {
-  useEffect(() => {
-    // Check Reddit proxy health on startup
-    checkRedditProxyHealth().then(({ healthy, message }) => {
-      console.log('🔍 Reddit Proxy Health Check:', message)
-      if (!healthy) {
-        console.warn('⚠️ Reddit integration may not work properly. Check the console for details.')
-      }
-    })
-  }, [])
+  // Reddit integration disabled due to API blocking issues
+  // useEffect(() => {
+  //   // Check Reddit proxy health on startup
+  //   checkRedditProxyHealth().then(({ healthy, message }) => {
+  //     console.log('🔍 Reddit Proxy Health Check:', message)
+  //     if (!healthy) {
+  //       console.warn('⚠️ Reddit integration may not work properly. Check the console for details.')
+  //     }
+  //   })
+  // }, [])
 
   return (
     <ThemeProvider>

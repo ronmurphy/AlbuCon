@@ -8,7 +8,7 @@ import FilteredPostCard from '../components/FilteredPostCard'
 import { defaultPreferences } from '../lib/contentTypes'
 import { fetchAllBlueskyFeeds, getExternalPosts } from '../services/blueskyService'
 import { fetchAllMastodonFeeds } from '../services/mastodonService'
-import { fetchAllRedditFeeds } from '../services/redditService'
+// import { fetchAllRedditFeeds } from '../services/redditService' // Disabled: Reddit API blocking requests
 import './Home.css'
 
 export default function Home({ onMinimize, onImageClick }) {
@@ -108,20 +108,21 @@ export default function Home({ onMinimize, onImageClick }) {
     setRefreshing(true)
     try {
       // Fetch from all platforms in parallel
-      const [blueskyCount, mastodonCount, redditCount] = await Promise.all([
+      // Reddit disabled due to API blocking issues
+      const [blueskyCount, mastodonCount] = await Promise.all([
         fetchAllBlueskyFeeds(user.id),
         fetchAllMastodonFeeds(user.id),
-        fetchAllRedditFeeds(user.id)
+        // fetchAllRedditFeeds(user.id) // Disabled: Reddit API blocking requests
       ])
 
-      const totalNewPosts = blueskyCount + mastodonCount + redditCount
+      const totalNewPosts = blueskyCount + mastodonCount
 
       if (totalNewPosts > 0) {
         await fetchExternalPosts()
         const platformsMsg = []
         if (blueskyCount > 0) platformsMsg.push(`${blueskyCount} from Bluesky`)
         if (mastodonCount > 0) platformsMsg.push(`${mastodonCount} from Mastodon`)
-        if (redditCount > 0) platformsMsg.push(`${redditCount} from Reddit`)
+        // if (redditCount > 0) platformsMsg.push(`${redditCount} from Reddit`)
         alert(`✓ Fetched ${totalNewPosts} new posts! (${platformsMsg.join(', ')})`)
       } else {
         alert('No new posts found')
