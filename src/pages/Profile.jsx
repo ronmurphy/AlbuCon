@@ -6,6 +6,7 @@ import PostCard from '../components/PostCard'
 import ConnectedServices from '../components/ConnectedServices'
 import FollowStats from '../components/FollowStats'
 import InviteCodeGenerator from '../components/InviteCodeGenerator'
+import PWAInstall from '../components/PWAInstall'
 import { contentTypes, platformTypes, defaultPreferences } from '../lib/contentTypes'
 import './Profile.css'
 
@@ -193,6 +194,9 @@ export default function Profile({ onOpenGallery }) {
           ))}
         </div>
       </div>
+
+      {/* PWA Install */}
+      <PWAInstall />
 
       {/* Content Preferences */}
       <div className="content-preferences-section card">
