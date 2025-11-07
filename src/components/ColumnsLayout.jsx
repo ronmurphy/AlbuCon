@@ -8,6 +8,7 @@ import Friends from '../pages/Friends'
 import Profile from '../pages/Profile'
 import MyImages from '../pages/MyImages'
 import UserTimeline from '../pages/UserTimeline'
+import Gallery from '../pages/Gallery'
 import FloatingWindow from './FloatingWindow'
 import ImageViewer from './ImageViewer'
 import ThemePreview from './ThemePreview'
@@ -334,6 +335,8 @@ export default function ColumnsLayout() {
       columnId = `user-${data.userId}`
     } else if (type === 'game') {
       columnId = `game-${data.gameType}`
+    } else if (type === 'gallery') {
+      columnId = `gallery-${data.userId}`
     }
 
     // Check if column already exists
@@ -416,7 +419,9 @@ export default function ColumnsLayout() {
                 ✕
               </button>
             </div>
-            <Profile />
+            <Profile onOpenGallery={(userId, username) => {
+              openColumn('gallery', { userId, username })
+            }} />
           </div>
         )
 
@@ -445,6 +450,30 @@ export default function ColumnsLayout() {
               username={column.data.username}
               profilePicture={column.data.profilePicture}
               onClose={() => closeColumn(column.id)}
+              onImageClick={openImageWindow}
+              onOpenGallery={(userId, username) => {
+                openColumn('gallery', { userId, username })
+              }}
+            />
+          </div>
+        )
+
+      case 'gallery':
+        return (
+          <div key={column.id} className="column-item">
+            <div className="column-header">
+              <h2 className="column-title">{column.data.username ? `${column.data.username}'s Gallery` : 'Gallery'}</h2>
+              <button
+                className="close-column-btn"
+                onClick={() => closeColumn(column.id)}
+                title="Close column"
+              >
+                ✕
+              </button>
+            </div>
+            <Gallery
+              userId={column.data.userId}
+              username={column.data.username}
               onImageClick={openImageWindow}
             />
           </div>

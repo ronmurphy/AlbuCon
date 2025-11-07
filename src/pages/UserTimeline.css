@@ -82,6 +82,10 @@
   color: var(--text-secondary);
 }
 
+.user-header .view-gallery-btn {
+  margin-top: 1rem;
+}
+
 .user-feed {
   margin-top: 1rem;
 }

@@ -6,7 +6,7 @@ import FilteredPostCard from '../components/FilteredPostCard'
 import { defaultPreferences } from '../lib/contentTypes'
 import './UserTimeline.css'
 
-export default function UserTimeline({ userId, username, profilePicture, onClose, onImageClick }) {
+export default function UserTimeline({ userId, username, profilePicture, onClose, onImageClick, onOpenGallery }) {
   const { user } = useAuth()
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -122,6 +122,14 @@ export default function UserTimeline({ userId, username, profilePicture, onClose
         </div>
         <h2 className="user-display-name">{username || userProfile?.username || 'Unknown User'}</h2>
         <p className="user-post-count">{posts.length} {posts.length === 1 ? 'post' : 'posts'}</p>
+        {onOpenGallery && (
+          <button
+            className="btn btn-primary view-gallery-btn"
+            onClick={() => onOpenGallery(userId, username || userProfile?.username)}
+          >
+            📷 View Gallery
+          </button>
+        )}
       </div>
 
       {/* User's Posts */}
