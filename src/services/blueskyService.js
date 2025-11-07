@@ -93,6 +93,19 @@ function transformBlueskyPost(blueskyPost, userId, followedAccountId) {
     imageUrl = post.embed.images[0].fullsize || post.embed.images[0].thumb
   }
 
+  // Extract video if available
+  let videoUrl = null
+  if (post.embed?.playlist) {
+    // Bluesky videos use HLS playlist
+    videoUrl = post.embed.playlist
+  } else if (post.embed?.video) {
+    // Alternative video format
+    videoUrl = post.embed.video
+  } else if (post.embed?.$type === 'app.bsky.embed.video' || post.embed?.$type === 'app.bsky.embed.video#view') {
+    // Check embed type and extract video
+    videoUrl = post.embed.playlist || post.embed.video
+  }
+
   // Build AT Protocol URI for the post
   const atUri = post.uri
   const originalUrl = `https://bsky.app/profile/${author.handle}/post/${atUri.split('/').pop()}`
@@ -107,6 +120,7 @@ function transformBlueskyPost(blueskyPost, userId, followedAccountId) {
     author_avatar: author.avatar || null,
     content: post.record?.text || '',
     image_url: imageUrl,
+    video_url: videoUrl,
     original_url: originalUrl,
     content_type: detectContentType(post.record?.text || ''),
     posted_at: post.record?.createdAt || post.indexedAt,

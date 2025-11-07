@@ -1,3 +1,4 @@
+import VideoPlayer from './VideoPlayer'
 import './ExternalPostCard.css'
 
 const PLATFORM_INFO = {
@@ -90,6 +91,13 @@ export default function ExternalPostCard({ post, onImageClick }) {
               console.error('Failed to load external image:', post.image_url)
             }}
           />
+        </div>
+      )}
+
+      {/* Display video if present */}
+      {post.video_url && (
+        <div className="post-video-container">
+          <VideoPlayer src={post.video_url} className="post-video" />
         </div>
       )}
 
