@@ -12,6 +12,8 @@ import ImageViewer from './ImageViewer'
 import RummikubGame from '../games/RummikubGame'
 import Minesweeper from '../games/Minesweeper'
 import WriteFlow from '../games/WriteFlow'
+import DonutsMagic from '../games/DonutsMagic'
+import IronTangle from '../games/IronTangle'
 import AppLauncher from './AppLauncher'
 import './ColumnsLayout.css'
 
@@ -148,6 +150,54 @@ export default function ColumnsLayout() {
     })
   }
 
+  const openDonutsMagicWindow = () => {
+    // Check if Donut's Magic window is already open
+    const exists = floatingWindows.find(w => w.type === 'donutsmagic')
+    if (exists) {
+      focusFloatingWindow(exists.id)
+      return
+    }
+
+    // Medium window for match-3 game
+    const width = Math.min(700, window.innerWidth * 0.85)
+    const height = Math.min(800, window.innerHeight * 0.9)
+    const x = (window.innerWidth - width) / 2
+    const y = (window.innerHeight - height) / 2
+
+    openFloatingWindow('donutsmagic', {}, {
+      initialWidth: width,
+      initialHeight: height,
+      initialX: x,
+      initialY: y,
+      minWidth: 500,
+      minHeight: 600
+    })
+  }
+
+  const openIronTangleWindow = () => {
+    // Check if Iron Tangle window is already open
+    const exists = floatingWindows.find(w => w.type === 'irontangle')
+    if (exists) {
+      focusFloatingWindow(exists.id)
+      return
+    }
+
+    // Medium window for puzzle game
+    const width = Math.min(700, window.innerWidth * 0.85)
+    const height = Math.min(750, window.innerHeight * 0.85)
+    const x = (window.innerWidth - width) / 2
+    const y = (window.innerHeight - height) / 2
+
+    openFloatingWindow('irontangle', {}, {
+      initialWidth: width,
+      initialHeight: height,
+      initialX: x,
+      initialY: y,
+      minWidth: 500,
+      minHeight: 500
+    })
+  }
+
   // App launcher
   const toggleLauncher = () => {
     setIsLauncherOpen(prev => !prev)
@@ -161,6 +211,20 @@ export default function ColumnsLayout() {
       icon: '🎲',
       description: 'Classic tile-based game. Play against AI opponents.',
       onClick: openRummikubWindow
+    },
+    {
+      id: 'donutsmagic',
+      name: "Donut's Magic",
+      icon: '🍩',
+      description: 'Match-3 puzzle game with powerups and combos.',
+      onClick: openDonutsMagicWindow
+    },
+    {
+      id: 'irontangle',
+      name: 'Iron Tangle',
+      icon: '🚂',
+      description: 'Connect railway pipes to solve puzzles.',
+      onClick: openIronTangleWindow
     },
     {
       id: 'minesweeper',
@@ -398,6 +462,8 @@ export default function ColumnsLayout() {
         else if (window.type === 'rummikub') title = 'Rummikub'
         else if (window.type === 'minesweeper') title = 'Minesweeper'
         else if (window.type === 'writeflow') title = 'WriteFlow'
+        else if (window.type === 'donutsmagic') title = "Donut's Magic Mania"
+        else if (window.type === 'irontangle') title = 'Iron Tangle Railway'
 
         return (
           <FloatingWindow
@@ -425,6 +491,12 @@ export default function ColumnsLayout() {
             )}
             {window.type === 'writeflow' && (
               <WriteFlow />
+            )}
+            {window.type === 'donutsmagic' && (
+              <DonutsMagic />
+            )}
+            {window.type === 'irontangle' && (
+              <IronTangle />
             )}
           </FloatingWindow>
         )
