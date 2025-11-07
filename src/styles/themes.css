@@ -1,12 +1,41 @@
 /* Theme System - CSS Variables */
 
-/* Base theme structure - all themes follow this pattern */
+/* Base theme structure - Default theme (Dark) */
 :root {
-  /* Will be overridden by specific themes */
+  /* Default to dark theme */
+  /* Backgrounds */
+  --background: #0f172a;
+  --surface: #1e293b;
+  --surface-hover: #334155;
+
+  /* Text */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+
+  /* Brand Colors */
+  --primary: #8b5cf6;
+  --primary-hover: #7c3aed;
+  --secondary: #ec4899;
+  --accent: #06b6d4;
+
+  /* Semantic Colors */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #3b82f6;
+
+  /* Borders & Dividers */
+  --border: #334155;
+  --border-light: #475569;
+
+  /* Shadows */
+  --shadow: rgba(0, 0, 0, 0.3);
+  --shadow-lg: rgba(0, 0, 0, 0.5);
 }
 
 /* ==================== DARK MODE (Default) ==================== */
-[data-theme="dark"] {
+:root[data-theme="dark"] {
   /* Backgrounds */
   --background: #0f172a;
   --surface: #1e293b;
@@ -39,7 +68,7 @@
 }
 
 /* ==================== LIGHT MODE ==================== */
-[data-theme="light"] {
+:root[data-theme="light"] {
   /* Backgrounds */
   --background: #f8fafc;
   --surface: #ffffff;
@@ -72,7 +101,7 @@
 }
 
 /* ==================== MIDNIGHT ==================== */
-[data-theme="midnight"] {
+:root[data-theme="midnight"] {
   /* Pure black for OLED screens */
   --background: #000000;
   --surface: #0a0a0a;
@@ -105,7 +134,7 @@
 }
 
 /* ==================== OCEAN ==================== */
-[data-theme="ocean"] {
+:root[data-theme="ocean"] {
   /* Deep blue ocean vibes */
   --background: #0c1e33;
   --surface: #143754;
@@ -138,7 +167,7 @@
 }
 
 /* ==================== FOREST ==================== */
-[data-theme="forest"] {
+:root[data-theme="forest"] {
   /* Natural green forest theme */
   --background: #0a1f0f;
   --surface: #153320;
@@ -171,7 +200,7 @@
 }
 
 /* ==================== SUNSET ==================== */
-[data-theme="sunset"] {
+:root[data-theme="sunset"] {
   /* Warm sunset colors */
   --background: #1f0f1a;
   --surface: #3d1a2d;
@@ -204,7 +233,7 @@
 }
 
 /* ==================== CYBERPUNK ==================== */
-[data-theme="cyberpunk"] {
+:root[data-theme="cyberpunk"] {
   /* Neon cyberpunk aesthetic */
   --background: #0d0221;
   --surface: #190b3a;
@@ -237,7 +266,7 @@
 }
 
 /* ==================== RETRO ==================== */
-[data-theme="retro"] {
+:root[data-theme="retro"] {
   /* 90s nostalgic colors */
   --background: #2d2d44;
   --surface: #3e3e5e;
@@ -270,7 +299,7 @@
 }
 
 /* ==================== NORD ==================== */
-[data-theme="nord"] {
+:root[data-theme="nord"] {
   /* Nord color palette - cool and elegant */
   --background: #2e3440;
   --surface: #3b4252;
