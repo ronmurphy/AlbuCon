@@ -82,15 +82,22 @@ export function ThemeProvider({ children }) {
   }, [])
 
   const applyTheme = (themeId) => {
+    console.log('[ThemeContext] Applying theme:', themeId)
     document.documentElement.setAttribute('data-theme', themeId)
+    console.log('[ThemeContext] Document theme attribute:', document.documentElement.getAttribute('data-theme'))
   }
 
   const changeTheme = (themeId) => {
-    if (!themes.find(t => t.id === themeId)) return
+    if (!themes.find(t => t.id === themeId)) {
+      console.error('[ThemeContext] Invalid theme ID:', themeId)
+      return
+    }
 
+    console.log('[ThemeContext] Changing theme from', currentTheme, 'to', themeId)
     setCurrentTheme(themeId)
     applyTheme(themeId)
     localStorage.setItem('albucon-theme', themeId)
+    console.log('[ThemeContext] Theme saved to localStorage:', themeId)
   }
 
   const openPreview = (themeId) => {
@@ -107,12 +114,24 @@ export function ThemeProvider({ children }) {
   const applyPreviewTheme = () => {
     if (previewTheme) {
       const themeId = previewTheme.id
+      console.log('[ThemeContext] Apply preview theme clicked:', themeId)
+
       // Apply theme first
       changeTheme(themeId)
-      // Close preview after a tiny delay to ensure theme applies
-      setTimeout(() => {
-        setPreviewTheme(null)
-      }, 100)
+
+      // Force a check that the theme was applied
+      requestAnimationFrame(() => {
+        const appliedTheme = document.documentElement.getAttribute('data-theme')
+        console.log('[ThemeContext] Theme after apply (RAF):', appliedTheme)
+
+        // Close preview after ensuring theme is applied
+        setTimeout(() => {
+          console.log('[ThemeContext] Closing preview window')
+          setPreviewTheme(null)
+        }, 150)
+      })
+    } else {
+      console.warn('[ThemeContext] applyPreviewTheme called but no previewTheme set')
     }
   }
 
