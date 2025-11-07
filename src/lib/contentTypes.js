@@ -30,13 +30,46 @@ export const contentTypes = [
   }
 ]
 
+// Platform/source filtering
+export const platformTypes = [
+  {
+    id: 'platform_bluesky',
+    name: 'Bluesky',
+    icon: '🦋',
+    description: 'Posts from Bluesky users',
+    color: '#1185fe'
+  },
+  {
+    id: 'platform_mastodon',
+    name: 'Mastodon',
+    icon: '🐘',
+    description: 'Posts from Mastodon users',
+    color: '#6364ff'
+  },
+  {
+    id: 'platform_reddit',
+    name: 'Reddit',
+    icon: '🤖',
+    description: 'Posts from Reddit',
+    color: '#ff4500'
+  }
+]
+
 export const defaultPreferences = {
   general: true,
   venting: true,
   political: true,
-  nsfw: false
+  nsfw: false,
+  // Platform preferences (show external posts by default)
+  platform_bluesky: true,
+  platform_mastodon: true,
+  platform_reddit: true
 }
 
 export const getContentType = (typeId) => {
   return contentTypes.find(t => t.id === typeId) || contentTypes[0]
+}
+
+export const getPlatformType = (platformId) => {
+  return platformTypes.find(type => type.id === platformId)
 }
