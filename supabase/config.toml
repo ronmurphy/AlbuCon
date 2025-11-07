@@ -1,0 +1,4 @@
+# Supabase Edge Functions Configuration
+
+[functions.reddit-proxy]
+verify_jwt = false  # Allow unauthenticated access for public Reddit data
