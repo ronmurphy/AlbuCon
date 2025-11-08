@@ -4,7 +4,7 @@ import { getUserImages, deleteImage } from '../lib/imageUtils'
 import { supabase } from '../lib/supabase'
 import './MyImages.css'
 
-export default function MyImages() {
+export default function MyImages({ onImageClick }) {
   const { user } = useAuth()
   const [images, setImages] = useState([])
   const [loading, setLoading] = useState(true)
@@ -144,7 +144,11 @@ export default function MyImages() {
                   </div>
                 )}
 
-                <div className="image-thumbnail">
+                <div
+                  className="image-thumbnail"
+                  onClick={() => onImageClick?.(image.public_url, 'My Image')}
+                  style={{ cursor: onImageClick ? 'pointer' : 'default' }}
+                >
                   <img
                     src={image.public_url}
                     alt="Uploaded image"

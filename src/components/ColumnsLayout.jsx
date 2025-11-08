@@ -440,9 +440,7 @@ export default function ColumnsLayout() {
                 ✕
               </button>
             </div>
-            <Profile onOpenGallery={(userId, username) => {
-              openColumn('gallery', { userId, username })
-            }} />
+            <Profile />
           </div>
         )
 
@@ -459,7 +457,7 @@ export default function ColumnsLayout() {
                 ✕
               </button>
             </div>
-            <MyImages />
+            <MyImages onImageClick={openImageWindow} />
           </div>
         )
 
