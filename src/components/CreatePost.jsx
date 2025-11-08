@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { uploadImage, isValidImageUrl, getUserImageCount } from '../lib/imageUtils'
 import { contentTypes } from '../lib/contentTypes'
+import { convertEmoticons } from '../utils/emojiUtils'
 import './CreatePost.css'
 
 export default function CreatePost({ onPostCreated }) {
@@ -112,11 +113,11 @@ export default function CreatePost({ onPostCreated }) {
         setImageCount(count + 1)
       }
 
-      // Create post
+      // Create post (convert emoticons to emojis)
       const { error } = await supabase
         .from('posts')
         .insert({
-          content: content.trim(),
+          content: convertEmoticons(content.trim()),
           user_id: user.id,
           image_url: finalImageUrl || null,
           content_type: contentType
