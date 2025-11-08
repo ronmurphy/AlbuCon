@@ -5,6 +5,7 @@ import CommentsSection from './CommentsSection'
 import FollowButton from './FollowButton'
 import YouTubeEmbed from './YouTubeEmbed'
 import { extractYouTubeVideoId } from '../utils/youtubeUtils'
+import { reactionTypesArray, countReactionsByType, getUserReaction, getTotalReactionCount } from '../utils/reactionTypes'
 import './PostCard.css'
 
 export default function PostCard({ post, onLikeUpdate, onImageClick, onPostDeleted, onOpenUserTimeline }) {
@@ -14,10 +15,13 @@ export default function PostCard({ post, onLikeUpdate, onImageClick, onPostDelet
   const [isEditing, setIsEditing] = useState(false)
   const [editedContent, setEditedContent] = useState(post.content)
   const [isSaving, setIsSaving] = useState(false)
+  const [showReactionPicker, setShowReactionPicker] = useState(false)
 
-  // Check if current user has liked this post
-  const hasLiked = post.likes?.some(like => like.user_id === user?.id)
-  const likeCount = post.likes?.length || 0
+  // Check if current user has reacted and get reaction counts
+  const userReaction = getUserReaction(post.likes, user?.id)
+  const hasReacted = userReaction !== null
+  const reactionCounts = countReactionsByType(post.likes)
+  const totalReactions = getTotalReactionCount(post.likes)
   const isOwnPost = user?.id === post.user_id
 
   // Check if post is editable (within 15 minutes of creation)
@@ -29,14 +33,15 @@ export default function PostCard({ post, onLikeUpdate, onImageClick, onPostDelet
     return minutesSincePost <= 15
   }
 
-  const handleLike = async () => {
+  const handleReaction = async (reactionType) => {
     if (!user || isLiking) return
 
     setIsLiking(true)
+    setShowReactionPicker(false)
 
     try {
-      if (hasLiked) {
-        // Unlike
+      // If user already reacted with this type, remove the reaction
+      if (userReaction === reactionType) {
         const { error } = await supabase
           .from('likes')
           .delete()
@@ -44,10 +49,24 @@ export default function PostCard({ post, onLikeUpdate, onImageClick, onPostDelet
 
         if (error) throw error
       } else {
-        // Like
+        // If user has a different reaction, delete old one first
+        if (hasReacted) {
+          const { error: deleteError } = await supabase
+            .from('likes')
+            .delete()
+            .match({ post_id: post.id, user_id: user.id })
+
+          if (deleteError) throw deleteError
+        }
+
+        // Insert new reaction
         const { error } = await supabase
           .from('likes')
-          .insert({ post_id: post.id, user_id: user.id })
+          .insert({
+            post_id: post.id,
+            user_id: user.id,
+            reaction_type: reactionType
+          })
 
         if (error) throw error
       }
@@ -55,7 +74,7 @@ export default function PostCard({ post, onLikeUpdate, onImageClick, onPostDelet
       // Refresh the post data
       if (onLikeUpdate) onLikeUpdate()
     } catch (error) {
-      console.error('Error toggling like:', error)
+      console.error('Error toggling reaction:', error)
     } finally {
       setIsLiking(false)
     }
@@ -267,14 +286,57 @@ export default function PostCard({ post, onLikeUpdate, onImageClick, onPostDelet
       })()}
 
       <div className="post-footer">
-        <button
-          className={`like-button ${hasLiked ? 'liked' : ''}`}
-          onClick={handleLike}
-          disabled={!user || isLiking}
-        >
-          <span className="like-icon">{hasLiked ? '❤️' : '🤍'}</span>
-          <span className="like-count">{likeCount}</span>
-        </button>
+        <div className="reactions-container">
+          {/* Main reaction button */}
+          <button
+            className={`reaction-button ${hasReacted ? 'reacted' : ''}`}
+            onClick={() => setShowReactionPicker(!showReactionPicker)}
+            disabled={!user || isLiking}
+            title={hasReacted ? 'Change your reaction' : 'Add a reaction'}
+          >
+            <span className="reaction-icon">
+              {hasReacted
+                ? reactionTypesArray.find(r => r.id === userReaction)?.emoji
+                : '🤍'}
+            </span>
+            <span className="reaction-count">{totalReactions}</span>
+          </button>
+
+          {/* Reaction picker */}
+          {showReactionPicker && (
+            <div className="reaction-picker">
+              {reactionTypesArray.map((reaction) => (
+                <button
+                  key={reaction.id}
+                  className={`reaction-option ${userReaction === reaction.id ? 'active' : ''}`}
+                  onClick={() => handleReaction(reaction.id)}
+                  disabled={isLiking}
+                  title={reaction.description}
+                >
+                  <span className="reaction-emoji">{reaction.emoji}</span>
+                  {reactionCounts[reaction.id] > 0 && (
+                    <span className="reaction-option-count">{reactionCounts[reaction.id]}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Reaction breakdown - show if there are reactions */}
+          {totalReactions > 0 && (
+            <div className="reaction-breakdown">
+              {reactionTypesArray.map((reaction) => {
+                const count = reactionCounts[reaction.id]
+                if (count === 0) return null
+                return (
+                  <span key={reaction.id} className="reaction-summary" title={`${count} ${reaction.label}`}>
+                    {reaction.emoji} {count}
+                  </span>
+                )
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Comments Section */}
