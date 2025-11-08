@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { uploadImage, isValidImageUrl, getUserImageCount } from '../lib/imageUtils'
 import { contentTypes } from '../lib/contentTypes'
 import { convertEmoticons } from '../utils/emojiUtils'
+import { autoTag } from '../utils/contentDetection'
 import './CreatePost.css'
 
 export default function CreatePost({ onPostCreated }) {
@@ -113,14 +114,17 @@ export default function CreatePost({ onPostCreated }) {
         setImageCount(count + 1)
       }
 
-      // Create post (convert emoticons to emojis)
+      // Create post (convert emoticons to emojis and auto-tag content)
+      // Use auto-detection if user kept it as 'general', otherwise respect their choice
+      const finalContentType = autoTag(content.trim(), contentType)
+
       const { error } = await supabase
         .from('posts')
         .insert({
           content: convertEmoticons(content.trim()),
           user_id: user.id,
           image_url: finalImageUrl || null,
-          content_type: contentType
+          content_type: finalContentType
         })
 
       if (error) throw error

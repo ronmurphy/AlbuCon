@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { convertEmoticons } from '../utils/emojiUtils'
+import VideoEmbed from '../components/VideoEmbed'
 import './DirectMessages.css'
 
 export default function DirectMessages({ recipientId, recipientUsername, recipientProfilePicture }) {
@@ -131,6 +132,8 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
                 <div className="dm-message-content">
                   {message.content}
                 </div>
+                {/* Display video embed if URL detected in message */}
+                <VideoEmbed content={message.content} />
                 <div className="dm-message-time">
                   {new Date(message.created_at).toLocaleString()}
                   {isOwn && message.read_at && <span className="dm-read-indicator"> ✓✓</span>}
