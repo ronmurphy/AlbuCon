@@ -88,6 +88,8 @@ export default function ExternalPostCard({ post, onImageClick }) {
             src={post.image_url}
             alt="Post image"
             className="post-image"
+            loading="lazy"
+            decoding="async"
             onError={(e) => {
               e.target.style.display = 'none'
               console.error('Failed to load external image:', post.image_url)

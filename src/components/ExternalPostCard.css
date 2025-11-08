@@ -102,15 +102,20 @@
   border-radius: 12px;
   overflow: hidden;
   background: var(--surface-hover);
+  max-width: 100%;
   max-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .post-image {
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   height: auto;
+  max-height: 500px;
   display: block;
   object-fit: contain;
-  max-height: 500px;
 }
 
 .post-image-container:hover {

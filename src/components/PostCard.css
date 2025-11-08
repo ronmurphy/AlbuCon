@@ -77,14 +77,20 @@
   border-radius: 12px;
   overflow: hidden;
   max-width: 100%;
+  max-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background);
 }
 
 .post-image {
-  width: 100%;
+  width: auto;
+  max-width: 100%;
+  height: auto;
   max-height: 500px;
   object-fit: contain;
   display: block;
-  background: var(--background);
   cursor: pointer;
   transition: transform 0.2s ease;
 }
