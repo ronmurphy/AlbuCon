@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { convertEmoticons } from '../utils/emojiUtils'
 import './DirectMessages.css'
 
 export default function DirectMessages({ recipientId, recipientUsername, recipientProfilePicture }) {
@@ -67,7 +68,7 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
         .insert({
           sender_id: user.id,
           recipient_id: recipientId,
-          content: newMessage.trim()
+          content: convertEmoticons(newMessage.trim())
         })
 
       if (error) throw error
