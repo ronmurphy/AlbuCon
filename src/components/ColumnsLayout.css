@@ -157,9 +157,18 @@
     /* Removed padding-bottom - dock floats above on mobile too */
   }
 
-  /* Game column header - swap order for better thumb reach */
-  .game-column .column-header {
-    flex-direction: row-reverse;
+  /* Make game close button more visible and larger on mobile */
+  .game-column .close-column-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1.2rem;
+    border: 2px solid var(--primary);
+    background: rgba(255, 107, 107, 0.1);
+  }
+
+  .game-column .close-column-btn:hover {
+    background: #ff6b6b;
+    transform: scale(1.2);
   }
 
   .settings-view {
