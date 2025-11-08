@@ -7,6 +7,9 @@ export default function NotificationBell() {
   const { unreadCount } = useNotifications()
   const [showDropdown, setShowDropdown] = useState(false)
   const dropdownRef = useRef(null)
+  const [uiStyle, setUiStyle] = useState(() => {
+    return localStorage.getItem('albucon-ui-style') || 'glass'
+  })
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -25,6 +28,15 @@ export default function NotificationBell() {
     }
   }, [showDropdown])
 
+  // Listen for UI style changes
+  useEffect(() => {
+    const handleStyleChange = (event) => {
+      setUiStyle(event.detail.style)
+    }
+    window.addEventListener('albucon-ui-style-change', handleStyleChange)
+    return () => window.removeEventListener('albucon-ui-style-change', handleStyleChange)
+  }, [])
+
   return (
     <div className="notification-bell-container" ref={dropdownRef}>
       <button
@@ -39,7 +51,7 @@ export default function NotificationBell() {
       </button>
 
       {showDropdown && (
-        <div className="notifications-dropdown">
+        <div className={`notifications-dropdown notifications-${uiStyle}`}>
           <NotificationsList onClose={() => setShowDropdown(false)} />
         </div>
       )}
