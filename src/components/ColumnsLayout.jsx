@@ -608,33 +608,8 @@ export default function ColumnsLayout() {
   // Get visible columns (not minimized)
   const visibleColumns = openColumns.filter(col => !col.minimized)
 
-  // Get open games for mobile indicator
-  const openGames = openColumns.filter(col => col.type === 'game' && !col.minimized)
-
   return (
     <div className="columns-layout">
-      {/* Mobile Game Indicators */}
-      {isMobile && openGames.length > 0 && (
-        <div className="mobile-game-indicators">
-          {openGames.map(game => (
-            <div
-              key={game.id}
-              className="game-indicator"
-              onClick={() => closeColumn(game.id)}
-              title={`Close ${game.data.gameName}`}
-            >
-              <span className="game-indicator-icon">
-                {game.data.gameType === 'minesweeper' && '💣'}
-                {game.data.gameType === 'donutsmagic' && '🍩'}
-                {game.data.gameType === 'irontangle' && '🚂'}
-                {game.data.gameType === 'rummikub' && '🎲'}
-                {game.data.gameType === 'writeflow' && '📝'}
-              </span>
-              <span className="game-indicator-close">✕</span>
-            </div>
-          ))}
-        </div>
-      )}
       <div className="main-content">
         <Columns
           visibleColumnCount={visibleColumns.length}

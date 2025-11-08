@@ -7,13 +7,26 @@ export default function Columns({ children, visibleColumnCount, openColumns }) {
   const [startX, setStartX] = useState(0)
   const [scrollLeft, setScrollLeft] = useState(0)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+  const [maxVisibleColumns, setMaxVisibleColumns] = useState(4)
   const columnsRef = useRef(null)
 
-  // Update isMobile on window resize
+  // Calculate max visible columns based on viewport width
   useEffect(() => {
+    const calculateMaxColumns = () => {
+      const AVERAGE_COLUMN_WIDTH = 400
+      const DOCK_SPACE = 100 // Reserve space for dock
+      const viewportWidth = window.innerWidth - DOCK_SPACE
+      const calculated = Math.floor(viewportWidth / AVERAGE_COLUMN_WIDTH)
+      setMaxVisibleColumns(Math.max(1, calculated))
+    }
+
+    calculateMaxColumns()
+
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768)
+      calculateMaxColumns()
     }
+
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
@@ -41,6 +54,9 @@ export default function Columns({ children, visibleColumnCount, openColumns }) {
 
   const columnWidth = getColumnWidth()
   const useFixedWidth = !isMobile && visibleColumnCount >= 5
+
+  // Determine if we need desktop navigation (more columns than can fit on screen)
+  const needsDesktopNav = !isMobile && columns.length > maxVisibleColumns
 
   // Touch/Mouse drag scrolling
   const handleMouseDown = (e) => {
@@ -120,6 +136,27 @@ export default function Columns({ children, visibleColumnCount, openColumns }) {
     }
   }, [currentColumn, columns.length, isDragging])
 
+  // Keyboard navigation for desktop
+  useEffect(() => {
+    if (isMobile || !needsDesktopNav) return
+
+    const handleKeyDown = (e) => {
+      // Ctrl/Cmd + Left Arrow
+      if ((e.ctrlKey || e.metaKey) && e.key === 'ArrowLeft') {
+        e.preventDefault()
+        handlePrev()
+      }
+      // Ctrl/Cmd + Right Arrow
+      if ((e.ctrlKey || e.metaKey) && e.key === 'ArrowRight') {
+        e.preventDefault()
+        handleNext()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [currentColumn, columns.length, isMobile, needsDesktopNav])
+
   return (
     <div className="columns-container">
       <div
@@ -178,6 +215,40 @@ export default function Columns({ children, visibleColumnCount, openColumns }) {
             disabled={currentColumn === columns.length - 1}
           >
             ›
+          </button>
+        </div>
+      )}
+
+      {/* Desktop navigation - show when columns exceed max visible */}
+      {needsDesktopNav && (
+        <div className="columns-desktop-nav">
+          <button
+            className="desktop-nav-arrow"
+            onClick={handlePrev}
+            disabled={currentColumn === 0}
+            title="Previous Column (Ctrl+←)"
+          >
+            ←
+          </button>
+
+          <div className="desktop-column-indicators">
+            {columns.map((_, index) => (
+              <button
+                key={index}
+                className={`desktop-indicator ${index === currentColumn ? 'active' : ''}`}
+                onClick={() => scrollToColumn(index)}
+                title={`Column ${index + 1}`}
+              />
+            ))}
+          </div>
+
+          <button
+            className="desktop-nav-arrow"
+            onClick={handleNext}
+            disabled={currentColumn === columns.length - 1}
+            title="Next Column (Ctrl+→)"
+          >
+            →
           </button>
         </div>
       )}
