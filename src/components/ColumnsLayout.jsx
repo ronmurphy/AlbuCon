@@ -6,6 +6,7 @@ import Columns from './Columns'
 import Home from '../pages/Home'
 import Friends from '../pages/Friends'
 import Profile from '../pages/Profile'
+import Settings from '../pages/Settings'
 import MyImages from '../pages/MyImages'
 import UserTimeline from '../pages/UserTimeline'
 import Gallery from '../pages/Gallery'
@@ -562,24 +563,7 @@ export default function ColumnsLayout() {
                 ✕
               </button>
             </div>
-            <div className="settings-view">
-              <div className="settings-card card">
-                <div className="settings-section">
-                  <h3>Account</h3>
-                  <p className="settings-info">
-                    <strong>Username:</strong> {user?.user_metadata?.username || 'Unknown'}
-                  </p>
-                  <p className="settings-info">
-                    <strong>Email:</strong> {user?.email || 'Unknown'}
-                  </p>
-                </div>
-                <div className="settings-section">
-                  <button onClick={handleSignOut} className="btn btn-danger">
-                    Sign Out
-                  </button>
-                </div>
-              </div>
-            </div>
+            <Settings onSignOut={handleSignOut} />
           </div>
         )
 
