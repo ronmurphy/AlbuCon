@@ -1,0 +1,97 @@
+/* Shared video embed styles for all platforms */
+
+.video-embed-container {
+  margin: 1rem 0;
+  position: relative;
+}
+
+.video-embed-wrapper {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* TikTok uses a different aspect ratio (9:16 - vertical) */
+.tiktok-wrapper {
+  max-width: 325px;
+  padding-bottom: 177.78%; /* 9:16 aspect ratio for vertical videos */
+  margin: 0 auto;
+}
+
+.video-embed-iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+}
+
+.video-embed-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: fit-content;
+}
+
+.video-icon {
+  font-size: 1rem;
+}
+
+.video-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* Platform-specific badge colors */
+.tiktok-badge {
+  background: rgba(254, 44, 85, 0.1);
+  border-color: rgba(254, 44, 85, 0.3);
+}
+
+.tiktok-badge .video-text {
+  color: #fe2c55;
+}
+
+.vimeo-badge {
+  background: rgba(26, 183, 234, 0.1);
+  border-color: rgba(26, 183, 234, 0.3);
+}
+
+.vimeo-badge .video-text {
+  color: #1ab7ea;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .video-embed-wrapper {
+    border-radius: 8px;
+  }
+
+  .tiktok-wrapper {
+    max-width: 280px;
+  }
+
+  .video-embed-badge {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .video-icon {
+    font-size: 0.9rem;
+  }
+
+  .video-text {
+    font-size: 0.75rem;
+  }
+}
