@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import './Columns.css'
 
 export default function Columns({ children, visibleColumnCount, openColumns }) {
@@ -95,7 +95,7 @@ export default function Columns({ children, visibleColumnCount, openColumns }) {
   }
 
   // Navigation buttons
-  const scrollToColumn = (index) => {
+  const scrollToColumn = useCallback((index) => {
     if (columnsRef.current) {
       const columnWidth = columnsRef.current.scrollWidth / columns.length
       columnsRef.current.scrollTo({
@@ -104,17 +104,17 @@ export default function Columns({ children, visibleColumnCount, openColumns }) {
       })
       setCurrentColumn(index)
     }
-  }
+  }, [columns.length])
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     const newIndex = Math.max(0, currentColumn - 1)
     scrollToColumn(newIndex)
-  }
+  }, [currentColumn, scrollToColumn])
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     const newIndex = Math.min(columns.length - 1, currentColumn + 1)
     scrollToColumn(newIndex)
-  }
+  }, [currentColumn, columns.length, scrollToColumn])
 
   // Update current column based on scroll position
   useEffect(() => {
@@ -155,7 +155,7 @@ export default function Columns({ children, visibleColumnCount, openColumns }) {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [currentColumn, columns.length, isMobile, needsDesktopNav])
+  }, [isMobile, needsDesktopNav, handlePrev, handleNext])
 
   return (
     <div className="columns-container">
