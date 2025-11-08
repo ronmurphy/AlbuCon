@@ -9,7 +9,7 @@ export default function Profile() {
   const { user } = useAuth()
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState({ totalPosts: 0, totalLikes: 0 })
+  const [stats, setStats] = useState({ totalPosts: 0, totalReactions: 0 })
   const [profilePicture, setProfilePicture] = useState(null)
 
   const fetchUserPosts = async () => {
@@ -56,8 +56,8 @@ export default function Profile() {
 
       // Calculate stats
       const totalPosts = postsWithData.length
-      const totalLikes = postsWithData.reduce((sum, post) => sum + (post.likes?.length || 0), 0)
-      setStats({ totalPosts, totalLikes })
+      const totalReactions = postsWithData.reduce((sum, post) => sum + (post.likes?.length || 0), 0)
+      setStats({ totalPosts, totalReactions })
     } catch (error) {
       console.error('Error fetching profile data:', error)
     } finally {
@@ -110,8 +110,8 @@ export default function Profile() {
             <div className="stat-label">Posts</div>
           </div>
           <div className="stat">
-            <div className="stat-value">{stats.totalLikes}</div>
-            <div className="stat-label">Likes Received</div>
+            <div className="stat-value">{stats.totalReactions}</div>
+            <div className="stat-label">Reactions Received</div>
           </div>
         </div>
       </div>
