@@ -11,11 +11,12 @@ import {
   removeFriendship,
   getFriendshipStatus
 } from '../lib/friendsUtils'
+import InviteCodeGenerator from '../components/InviteCodeGenerator'
 import './Friends.css'
 
 export default function Friends({ onOpenUserTimeline }) {
   const { user } = useAuth()
-  const [activeTab, setActiveTab] = useState('friends') // friends, find, pending, sent
+  const [activeTab, setActiveTab] = useState('friends') // friends, find, pending, sent, invite
   const [friends, setFriends] = useState([])
   const [pendingRequests, setPendingRequests] = useState([])
   const [sentRequests, setSentRequests] = useState([])
@@ -213,6 +214,12 @@ export default function Friends({ onOpenUserTimeline }) {
           onClick={() => setActiveTab('sent')}
         >
           Sent {sentRequests.length > 0 && `(${sentRequests.length})`}
+        </button>
+        <button
+          className={`tab ${activeTab === 'invite' ? 'active' : ''}`}
+          onClick={() => setActiveTab('invite')}
+        >
+          Invite Friends
         </button>
       </div>
 
@@ -443,6 +450,13 @@ export default function Friends({ onOpenUserTimeline }) {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Invite Friends Tab */}
+      {activeTab === 'invite' && (
+        <div className="tab-content">
+          <InviteCodeGenerator />
         </div>
       )}
     </div>
