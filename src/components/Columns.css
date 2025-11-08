@@ -218,7 +218,7 @@
 /* Desktop navigation - glassmorphism style above dock */
 .columns-desktop-nav {
   position: fixed;
-  bottom: 140px; /* Position well above dock */
+  bottom: 100px; /* Position above dock */
   left: 50%;
   transform: translateX(-50%);
   display: flex;

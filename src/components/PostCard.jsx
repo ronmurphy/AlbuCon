@@ -7,7 +7,7 @@ import YouTubeEmbed from './YouTubeEmbed'
 import { extractYouTubeVideoId } from '../utils/youtubeUtils'
 import './PostCard.css'
 
-export default function PostCard({ post, onLikeUpdate, onImageClick, onPostDeleted }) {
+export default function PostCard({ post, onLikeUpdate, onImageClick, onPostDeleted, onOpenUserTimeline }) {
   const { user } = useAuth()
   const [isLiking, setIsLiking] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -142,7 +142,12 @@ export default function PostCard({ post, onLikeUpdate, onImageClick, onPostDelet
     <div className="post-card card fade-in">
       <div className="post-header">
         <div className="post-author">
-          <div className="author-avatar">
+          <div
+            className="author-avatar"
+            onClick={() => onOpenUserTimeline?.(post.user_id, post.profiles?.username, post.profiles?.profile_picture_url)}
+            style={{ cursor: onOpenUserTimeline ? 'pointer' : 'default' }}
+            title={`View ${post.profiles?.username}'s profile`}
+          >
             {post.profiles?.profile_picture_url ? (
               <img
                 src={post.profiles.profile_picture_url}
@@ -159,7 +164,12 @@ export default function PostCard({ post, onLikeUpdate, onImageClick, onPostDelet
             </div>
           </div>
           <div className="author-info">
-            <div className="author-name">
+            <div
+              className="author-name"
+              onClick={() => onOpenUserTimeline?.(post.user_id, post.profiles?.username, post.profiles?.profile_picture_url)}
+              style={{ cursor: onOpenUserTimeline ? 'pointer' : 'default' }}
+              title={`View ${post.profiles?.username}'s profile`}
+            >
               {post.profiles?.username || 'Anonymous'}
             </div>
             <div className="post-time">

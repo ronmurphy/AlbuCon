@@ -100,7 +100,7 @@ export default function MyImages({ onImageClick }) {
 
   if (!user) {
     return (
-      <div className="container my-images-page">
+      <div className="my-images-page">
         <div className="card">
           <p className="login-prompt">Please log in to view your images.</p>
         </div>
@@ -110,14 +110,14 @@ export default function MyImages({ onImageClick }) {
 
   if (loading) {
     return (
-      <div className="container my-images-page">
+      <div className="my-images-page">
         <div className="spinner"></div>
       </div>
     )
   }
 
   return (
-    <div className="container my-images-page">
+    <div className="my-images-page">
       <div className="images-count">
         <strong>{images.length}/20</strong> images uploaded
       </div>

@@ -11,7 +11,7 @@ import { fetchAllMastodonFeeds } from '../services/mastodonService'
 // import { fetchAllRedditFeeds } from '../services/redditService' // Disabled: Reddit API blocking requests
 import './Home.css'
 
-export default function Home({ onMinimize, onImageClick }) {
+export default function Home({ onMinimize, onImageClick, onOpenUserTimeline }) {
   const { user } = useAuth()
   const [posts, setPosts] = useState([])
   const [externalPosts, setExternalPosts] = useState([])
@@ -253,6 +253,7 @@ export default function Home({ onMinimize, onImageClick }) {
                 onLikeUpdate={fetchPosts}
                 onImageClick={onImageClick}
                 onPostDeleted={fetchPosts}
+                onOpenUserTimeline={onOpenUserTimeline}
               />
             )
           })

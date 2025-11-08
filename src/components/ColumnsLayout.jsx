@@ -404,7 +404,13 @@ export default function ColumnsLayout() {
       case 'feed':
         return (
           <div key={column.id} className="column-item">
-            <Home onMinimize={handleMinimizeFeed} onImageClick={openImageWindow} />
+            <Home
+              onMinimize={handleMinimizeFeed}
+              onImageClick={openImageWindow}
+              onOpenUserTimeline={(userId, username, profilePic) => {
+                openColumn('user', { userId, username, profilePicture: profilePic })
+              }}
+            />
           </div>
         )
 
