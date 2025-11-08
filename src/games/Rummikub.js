@@ -2200,9 +2200,5 @@ export class RummikubGame {
 
 }
 
-// 🎮 Initialize the game (instance will set window.activeApp during init)
-try {
-  new NebulaApp_Rummikub();
-} catch (error) {
-  console.error('Failed to initialize Rummikub:', error);
-}
+// Export the game class for use in React component
+// The game is instantiated in RummikubGame.jsx
