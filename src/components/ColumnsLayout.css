@@ -157,18 +157,36 @@
     /* Removed padding-bottom - dock floats above on mobile too */
   }
 
-  /* Make game close button more visible and larger on mobile */
-  .game-column .close-column-btn {
-    width: 36px;
-    height: 36px;
-    font-size: 1.2rem;
-    border: 2px solid var(--primary);
-    background: rgba(255, 107, 107, 0.1);
+  /* Make game close button MUCH more visible on mobile */
+  .game-column .column-header {
+    padding: 0.75rem 1rem;
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
   }
 
-  .game-column .close-column-btn:hover {
+  .game-column .column-title {
+    font-size: 1.25rem;
+    flex: 1;
+  }
+
+  .game-column .close-column-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 1.5rem;
+    border: 3px solid #ff6b6b;
+    background: rgba(255, 107, 107, 0.2);
+    color: #ff6b6b;
+    flex-shrink: 0;
+  }
+
+  .game-column .close-column-btn:active {
     background: #ff6b6b;
-    transform: scale(1.2);
+    color: white;
+    transform: scale(0.95);
   }
 
   .settings-view {
