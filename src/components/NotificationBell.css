@@ -48,15 +48,41 @@
   position: absolute;
   top: calc(100% + 0.5rem);
   right: 0;
-  background: var(--card-background);
-  border: 1px solid var(--border);
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   width: 400px;
   max-height: 600px;
   overflow: hidden;
   z-index: 1000;
   animation: slideDown 0.2s ease;
+}
+
+/* Glass style (default) */
+.notifications-glass {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+}
+
+/* Solid style */
+.notifications-solid {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  box-shadow: 0 8px 32px var(--shadow);
+}
+
+/* Dark mode support for glass */
+@media (prefers-color-scheme: dark) {
+  .notifications-glass {
+    background: rgba(30, 30, 30, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  }
 }
 
 @keyframes slideDown {

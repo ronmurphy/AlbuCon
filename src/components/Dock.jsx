@@ -7,6 +7,9 @@ export default function Dock({ openColumns, onToggleColumn, onCloseColumn, onSig
   const { user } = useAuth()
   const [pendingCount, setPendingCount] = useState(0)
   const [hoveredItem, setHoveredItem] = useState(null)
+  const [uiStyle, setUiStyle] = useState(() => {
+    return localStorage.getItem('albucon-ui-style') || 'glass'
+  })
 
   useEffect(() => {
     if (user) {
@@ -15,6 +18,15 @@ export default function Dock({ openColumns, onToggleColumn, onCloseColumn, onSig
       return () => clearInterval(interval)
     }
   }, [user])
+
+  // Listen for UI style changes
+  useEffect(() => {
+    const handleStyleChange = (event) => {
+      setUiStyle(event.detail.style)
+    }
+    window.addEventListener('albucon-ui-style-change', handleStyleChange)
+    return () => window.removeEventListener('albucon-ui-style-change', handleStyleChange)
+  }, [])
 
   const loadPendingRequests = async () => {
     try {
@@ -57,7 +69,7 @@ export default function Dock({ openColumns, onToggleColumn, onCloseColumn, onSig
 
   return (
     <div className="dock-container">
-      <div className="dock">
+      <div className={`dock dock-${uiStyle}`}>
         {/* Static Items */}
         {staticItems.map((item) => {
           const isOpen = isColumnOpen(item.type)

@@ -12,6 +12,9 @@ export default function Settings({ onSignOut }) {
   const { currentTheme, openPreview, themes } = useTheme()
   const [contentPreferences, setContentPreferences] = useState(defaultPreferences)
   const [savingPreferences, setSavingPreferences] = useState(false)
+  const [uiStyle, setUiStyle] = useState(() => {
+    return localStorage.getItem('albucon-ui-style') || 'glass'
+  })
 
   useEffect(() => {
     loadContentPreferences()
@@ -62,6 +65,13 @@ export default function Settings({ onSignOut }) {
     saveContentPreferences(newPreferences)
   }
 
+  const handleUiStyleChange = (style) => {
+    setUiStyle(style)
+    localStorage.setItem('albucon-ui-style', style)
+    // Dispatch custom event so other components can listen
+    window.dispatchEvent(new CustomEvent('albucon-ui-style-change', { detail: { style } }))
+  }
+
   return (
     <div className="settings-page">
       {/* Account Info */}
@@ -104,6 +114,40 @@ export default function Settings({ onSignOut }) {
               )}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* UI Style Selector */}
+      <div className="settings-section card">
+        <h2 className="section-title">UI Style</h2>
+        <p className="section-description">Choose between glass or solid styling for dock and notifications</p>
+        <div className="ui-style-options">
+          <button
+            className={`ui-style-option ${uiStyle === 'glass' ? 'active' : ''}`}
+            onClick={() => handleUiStyleChange('glass')}
+          >
+            <div className="ui-style-preview glass-preview">
+              <div className="preview-content">✨</div>
+            </div>
+            <div className="ui-style-info">
+              <div className="ui-style-name">Glass</div>
+              <div className="ui-style-description">Translucent with blur effect</div>
+            </div>
+            {uiStyle === 'glass' && <div className="ui-style-check">✓</div>}
+          </button>
+          <button
+            className={`ui-style-option ${uiStyle === 'solid' ? 'active' : ''}`}
+            onClick={() => handleUiStyleChange('solid')}
+          >
+            <div className="ui-style-preview solid-preview">
+              <div className="preview-content">🎨</div>
+            </div>
+            <div className="ui-style-info">
+              <div className="ui-style-name">Solid</div>
+              <div className="ui-style-description">Opaque with theme colors</div>
+            </div>
+            {uiStyle === 'solid' && <div className="ui-style-check">✓</div>}
+          </button>
         </div>
       </div>
 
