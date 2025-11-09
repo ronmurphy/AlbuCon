@@ -11,8 +11,8 @@ export default function CreatePost({ onPostCreated }) {
   const { user } = useAuth()
   const [content, setContent] = useState('')
   const [contentType, setContentType] = useState('general')
-  const [imageFile, setImageFile] = useState(null)
-  const [imagePreview, setImagePreview] = useState('')
+  const [imageFiles, setImageFiles] = useState([]) // Changed to array for multiple images
+  const [imagePreviews, setImagePreviews] = useState([]) // Changed to array
   const [isPosting, setIsPosting] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState(null)
@@ -27,48 +27,61 @@ export default function CreatePost({ onPostCreated }) {
     }
   }, [user])
 
-  // Auto-detect image URLs in content
-  useEffect(() => {
-    if (!imageFile) {
-      const urlPattern = /https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp)(\?[^\s]*)?/i
-      const match = content.match(urlPattern)
-      if (match && isValidImageUrl(match[0])) {
-        setImagePreview(match[0])
-      } else {
-        setImagePreview('')
-      }
-    }
-  }, [content, imageFile])
-
   const handleFileSelect = (e) => {
-    const file = e.target.files[0]
-    if (!file) return
+    const files = Array.from(e.target.files)
+    if (files.length === 0) return
 
-    // Validate file type
+    // Check if adding these files would exceed 4 images
+    if (imageFiles.length + files.length > 4) {
+      setError('You can only upload up to 4 images per post')
+      return
+    }
+
+    // Validate each file
     const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
-    if (!validTypes.includes(file.type)) {
-      setError('Please select a valid image file (JPG, PNG, GIF, or WEBP)')
-      return
+    const validFiles = []
+    const newPreviews = []
+
+    for (const file of files) {
+      // Validate file type
+      if (!validTypes.includes(file.type)) {
+        setError('Please select valid image files (JPG, PNG, GIF, or WEBP)')
+        continue
+      }
+
+      // Validate file size (10MB max)
+      if (file.size > 10 * 1024 * 1024) {
+        setError('Each image must be less than 10MB')
+        continue
+      }
+
+      validFiles.push(file)
+
+      // Create preview
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        newPreviews.push(e.target.result)
+        if (newPreviews.length === validFiles.length) {
+          setImagePreviews(prev => [...prev, ...newPreviews])
+        }
+      }
+      reader.readAsDataURL(file)
     }
 
-    // Validate file size (10MB max)
-    if (file.size > 10 * 1024 * 1024) {
-      setError('Image must be less than 10MB')
-      return
+    if (validFiles.length > 0) {
+      setImageFiles(prev => [...prev, ...validFiles])
+      setError(null)
     }
-
-    setImageFile(file)
-    setError(null)
-
-    // Create preview
-    const reader = new FileReader()
-    reader.onload = (e) => setImagePreview(e.target.result)
-    reader.readAsDataURL(file)
   }
 
-  const clearImage = () => {
-    setImageFile(null)
-    setImagePreview('')
+  const removeImage = (index) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index))
+    setImagePreviews(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const clearAllImages = () => {
+    setImageFiles([])
+    setImagePreviews([])
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -77,8 +90,8 @@ export default function CreatePost({ onPostCreated }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!content.trim() && !imageFile) {
-      setError('Please write something or add an image!')
+    if (!content.trim() && imageFiles.length === 0) {
+      setError('Please write something or add images!')
       return
     }
 
@@ -91,27 +104,26 @@ export default function CreatePost({ onPostCreated }) {
     setError(null)
 
     try {
-      let finalImageUrl = null
+      const imageUrls = []
 
-      // Check for image URL in content (don't count it against char limit)
-      const urlPattern = /https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp)(\?[^\s]*)?/i
-      const match = content.match(urlPattern)
-      if (match && isValidImageUrl(match[0])) {
-        finalImageUrl = match[0]
-      }
-
-      // Upload file if selected
-      if (imageFile) {
+      // Upload all selected images
+      if (imageFiles.length > 0) {
         // Check image limit
         const count = await getUserImageCount(user.id)
-        if (count >= 20) {
-          throw new Error('You have reached the limit of 20 uploaded images. Please delete some images first.')
+        if (count + imageFiles.length > 20) {
+          throw new Error(`You can only upload ${20 - count} more images. You have ${count}/20 images uploaded.`)
         }
 
         setIsUploading(true)
-        finalImageUrl = await uploadImage(imageFile, user.id)
+
+        // Upload each image
+        for (const file of imageFiles) {
+          const url = await uploadImage(file, user.id)
+          imageUrls.push(url)
+        }
+
         setIsUploading(false)
-        setImageCount(count + 1)
+        setImageCount(count + imageFiles.length)
       }
 
       // Create post (convert emoticons to emojis and auto-tag content)
@@ -123,7 +135,8 @@ export default function CreatePost({ onPostCreated }) {
         .insert({
           content: convertEmoticons(content.trim()),
           user_id: user.id,
-          image_url: finalImageUrl || null,
+          image_urls: imageUrls, // Store as JSON array
+          image_url: imageUrls[0] || null, // Keep first image in old column for backward compatibility
           content_type: finalContentType
         })
 
@@ -132,7 +145,7 @@ export default function CreatePost({ onPostCreated }) {
       // Clear the form
       setContent('')
       setContentType('general')
-      clearImage()
+      clearAllImages()
 
       // Notify parent component to refresh the feed
       if (onPostCreated) onPostCreated()
@@ -171,20 +184,23 @@ export default function CreatePost({ onPostCreated }) {
           />
         </div>
 
-        {/* Image Preview */}
-        {imagePreview && (
-          <div className="image-preview-container">
-            <img src={imagePreview} alt="Preview" className="image-preview" />
-            {imageFile && (
-              <button
-                type="button"
-                className="clear-image-btn"
-                onClick={clearImage}
-                disabled={isPosting || isUploading}
-              >
-                ✕
-              </button>
-            )}
+        {/* Image Previews */}
+        {imagePreviews.length > 0 && (
+          <div className="image-previews-container">
+            {imagePreviews.map((preview, index) => (
+              <div key={index} className="image-preview-item">
+                <img src={preview} alt={`Preview ${index + 1}`} className="image-preview" />
+                <button
+                  type="button"
+                  className="remove-image-btn"
+                  onClick={() => removeImage(index)}
+                  disabled={isPosting || isUploading}
+                  title="Remove this image"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
           </div>
         )}
 
@@ -194,6 +210,7 @@ export default function CreatePost({ onPostCreated }) {
               ref={fileInputRef}
               type="file"
               accept="image/jpeg,image/png,image/gif,image/webp"
+              multiple
               onChange={handleFileSelect}
               disabled={isPosting || isUploading}
               style={{ display: 'none' }}
@@ -203,10 +220,10 @@ export default function CreatePost({ onPostCreated }) {
               type="button"
               className="icon-btn camera-btn"
               onClick={() => fileInputRef.current?.click()}
-              disabled={isPosting || isUploading || imageCount >= 20}
-              title={`Upload Image • ${imageCount}/20 images`}
+              disabled={isPosting || isUploading || imageCount >= 20 || imageFiles.length >= 4}
+              title={`Upload Images (${imageFiles.length}/4 selected) • ${imageCount}/20 total`}
             >
-              📷
+              📷 {imageFiles.length > 0 && `(${imageFiles.length})`}
             </button>
 
             <select
@@ -233,7 +250,7 @@ export default function CreatePost({ onPostCreated }) {
           <button
             type="submit"
             className="btn btn-primary btn-sm"
-            disabled={isPosting || isUploading || (!content.trim() && !imageFile)}
+            disabled={isPosting || isUploading || (!content.trim() && imageFiles.length === 0)}
           >
             {isUploading ? 'Uploading...' : isPosting ? 'Posting...' : 'Post'}
           </button>
