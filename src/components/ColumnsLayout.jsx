@@ -542,11 +542,13 @@ export default function ColumnsLayout() {
                 ✕
               </button>
             </div>
-            <DirectMessages
-              recipientId={column.data.recipientId}
-              recipientUsername={column.data.recipientUsername}
-              recipientProfilePicture={column.data.recipientProfilePicture}
-            />
+            <div className="column-content">
+              <DirectMessages
+                recipientId={column.data.recipientId}
+                recipientUsername={column.data.recipientUsername}
+                recipientProfilePicture={column.data.recipientProfilePicture}
+              />
+            </div>
           </div>
         )
 
