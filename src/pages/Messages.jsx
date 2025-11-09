@@ -33,7 +33,7 @@ export default function Messages({ onOpenDM }) {
 
   // Filter friends by search query
   const filteredFriends = friends.filter(friend =>
-    friend.username.toLowerCase().includes(searchQuery.toLowerCase())
+    friend.username?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   if (loading) {
@@ -126,17 +126,17 @@ export default function Messages({ onOpenDM }) {
                 {friend.profile_picture_url ? (
                   <img
                     src={friend.profile_picture_url}
-                    alt={friend.username}
+                    alt={friend.username || 'Friend'}
                     className="messages-friend-pic"
                   />
                 ) : (
                   <div className="messages-friend-initial">
-                    {friend.username[0].toUpperCase()}
+                    {friend.username?.[0]?.toUpperCase() || '?'}
                   </div>
                 )}
               </div>
               <div className="messages-friend-info">
-                <div className="messages-friend-name">{friend.username}</div>
+                <div className="messages-friend-name">{friend.username || 'Unknown User'}</div>
                 <div className="messages-friend-hint">Click to message</div>
               </div>
             </div>
