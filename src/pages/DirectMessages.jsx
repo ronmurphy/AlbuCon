@@ -418,8 +418,10 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
             <p>💬 No messages yet</p>
             <p className="dm-empty-hint">Start the conversation!</p>
           </div>
-        ) : (
-          messages.filter(message => message !== null && message !== undefined).map((message, index) => {
+        ) : (() => {
+          // Filter out null messages first, then map
+          const validMessages = messages.filter(message => message !== null && message !== undefined)
+          return validMessages.map((message, index) => {
             const isOwn = message.sender_id === user.id
             const images = message.image_urls && message.image_urls.length > 0
               ? message.image_urls
@@ -427,8 +429,8 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
             const isDeleted = message.deleted_at !== null
             const isEdited = message.edited_at !== null
             const isEditing = editingMessageId === message.id
-            const prevMsg = index > 0 ? messages[index - 1] : null
-            const nextMsg = index < messages.length - 1 ? messages[index + 1] : null
+            const prevMsg = index > 0 ? validMessages[index - 1] : null
+            const nextMsg = index < validMessages.length - 1 ? validMessages[index + 1] : null
 
             const isGrouped = shouldGroupWithPrevious(message, prevMsg)
             const isLastInGroup = !shouldGroupWithPrevious(nextMsg, message)
@@ -525,7 +527,7 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
             </div>
             )
           })
-        )}
+        })()}
         {recipientTyping && (
           <div className="dm-typing-indicator">
             <div className="dm-typing-bubble">

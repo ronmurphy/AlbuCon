@@ -5,7 +5,7 @@ import PostCard from '../components/PostCard'
 import FollowStats from '../components/FollowStats'
 import './Profile.css'
 
-export default function Profile({ onOpenSettings }) {
+export default function Profile({ onOpenSettings, onOpenGallery, onOpenDirectMessage }) {
   const { user } = useAuth()
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -104,12 +104,24 @@ export default function Profile({ onOpenSettings }) {
         {/* Follow Stats */}
         <FollowStats userId={user?.id} />
 
-        {/* Settings Button */}
-        {onOpenSettings && (
-          <button className="btn btn-secondary profile-settings-btn" onClick={onOpenSettings}>
-            ⚙️ Settings
-          </button>
-        )}
+        {/* Action Buttons */}
+        <div className="profile-action-buttons">
+          {onOpenGallery && (
+            <button className="btn btn-primary" onClick={() => onOpenGallery(user?.id, user?.user_metadata?.username)}>
+              📷 My Images
+            </button>
+          )}
+          {onOpenDirectMessage && (
+            <button className="btn btn-secondary" onClick={() => onOpenDirectMessage(user?.id, user?.user_metadata?.username, profilePicture)}>
+              💬 Message Myself
+            </button>
+          )}
+          {onOpenSettings && (
+            <button className="btn btn-secondary" onClick={onOpenSettings}>
+              ⚙️ Settings
+            </button>
+          )}
+        </div>
 
         <div className="profile-stats">
           <div className="stat">
