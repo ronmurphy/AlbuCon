@@ -544,4 +544,38 @@
   .dm-messages {
     padding: 0.75rem;
   }
+
+  /* Fix squished input area on mobile */
+  .dm-input-form {
+    padding: 0.75rem;
+  }
+
+  .dm-input-wrapper {
+    gap: 0.5rem;
+  }
+
+  /* Make buttons smaller on mobile so textarea has more room */
+  .dm-image-btn {
+    padding: 0.65rem 0.85rem;
+    font-size: 1.1rem;
+    min-width: 44px; /* Touch-friendly minimum */
+  }
+
+  .dm-send-btn {
+    padding: 0.65rem 1rem;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+
+  .dm-input {
+    font-size: 0.9rem;
+    padding: 0.65rem;
+    min-height: 44px; /* Ensure touch-friendly height */
+  }
+
+  /* Make image previews smaller on mobile */
+  .dm-image-previews {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 0.5rem;
+  }
 }
