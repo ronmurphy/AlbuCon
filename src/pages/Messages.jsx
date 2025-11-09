@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { getFriends } from '../lib/friendsUtils'
+import { supabase } from '../lib/supabase'
 import './Messages.css'
 
 export default function Messages({ onOpenDM }) {
@@ -8,10 +9,28 @@ export default function Messages({ onOpenDM }) {
   const [friends, setFriends] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [profilePicture, setProfilePicture] = useState(null)
 
   useEffect(() => {
     loadFriends()
+    loadProfile()
   }, [user])
+
+  const loadProfile = async () => {
+    if (!user) return
+
+    try {
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('profile_picture_url')
+        .eq('id', user.id)
+        .single()
+
+      setProfilePicture(profileData?.profile_picture_url)
+    } catch (err) {
+      console.error('Error loading profile:', err)
+    }
+  }
 
   const loadFriends = async () => {
     if (!user) return
@@ -33,10 +52,10 @@ export default function Messages({ onOpenDM }) {
     onOpenDM(friend.id, friend.username, friend.profile_picture_url)
   }
 
-  // Filter friends by search query
+  // Filter friends by search query - getFriends returns friend_username not username
   const filteredFriends = friends.filter(friend => {
-    if (!friend || !friend.username) return false
-    return friend.username.toLowerCase().includes(searchQuery.toLowerCase())
+    if (!friend || !friend.friend_username) return false
+    return friend.friend_username.toLowerCase().includes(searchQuery.toLowerCase())
   })
 
   if (loading) {
@@ -75,13 +94,13 @@ export default function Messages({ onOpenDM }) {
           onClick={() => handleOpenDM({
             id: user.id,
             username: user.user_metadata?.username || 'You',
-            profile_picture_url: user.user_metadata?.profile_picture_url
+            profile_picture_url: profilePicture
           })}
         >
           <div className="messages-friend-avatar">
-            {user.user_metadata?.profile_picture_url ? (
+            {profilePicture ? (
               <img
-                src={user.user_metadata.profile_picture_url}
+                src={profilePicture}
                 alt="You"
                 className="messages-friend-pic"
               />
@@ -121,25 +140,29 @@ export default function Messages({ onOpenDM }) {
         ) : (
           filteredFriends.map((friend) => (
             <div
-              key={friend.id}
+              key={friend.friend_id}
               className="messages-friend-item"
-              onClick={() => handleOpenDM(friend)}
+              onClick={() => handleOpenDM({
+                id: friend.friend_id,
+                username: friend.friend_username,
+                profile_picture_url: friend.friend_profile_picture
+              })}
             >
               <div className="messages-friend-avatar">
-                {friend.profile_picture_url ? (
+                {friend.friend_profile_picture ? (
                   <img
-                    src={friend.profile_picture_url}
-                    alt={friend.username || 'Friend'}
+                    src={friend.friend_profile_picture}
+                    alt={friend.friend_username || 'Friend'}
                     className="messages-friend-pic"
                   />
                 ) : (
                   <div className="messages-friend-initial">
-                    {friend.username?.[0]?.toUpperCase() || '?'}
+                    {friend.friend_username?.[0]?.toUpperCase() || '?'}
                   </div>
                 )}
               </div>
               <div className="messages-friend-info">
-                <div className="messages-friend-name">{friend.username || 'Unknown User'}</div>
+                <div className="messages-friend-name">{friend.friend_username || 'Unknown User'}</div>
                 <div className="messages-friend-hint">Click to message</div>
               </div>
             </div>
