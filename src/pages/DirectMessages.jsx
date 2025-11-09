@@ -419,7 +419,7 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
             <p className="dm-empty-hint">Start the conversation!</p>
           </div>
         ) : (
-          messages.map((message, index) => {
+          messages.filter(message => message !== null && message !== undefined).map((message, index) => {
             const isOwn = message.sender_id === user.id
             const images = message.image_urls && message.image_urls.length > 0
               ? message.image_urls

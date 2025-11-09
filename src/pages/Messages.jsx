@@ -19,9 +19,11 @@ export default function Messages({ onOpenDM }) {
     try {
       setLoading(true)
       const friendsList = await getFriends(user.id)
-      setFriends(friendsList)
+      console.log('Messages - Loaded friends:', friendsList)
+      setFriends(friendsList || [])
     } catch (err) {
       console.error('Error loading friends:', err)
+      setFriends([])
     } finally {
       setLoading(false)
     }
@@ -32,9 +34,10 @@ export default function Messages({ onOpenDM }) {
   }
 
   // Filter friends by search query
-  const filteredFriends = friends.filter(friend =>
-    friend.username?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredFriends = friends.filter(friend => {
+    if (!friend || !friend.username) return false
+    return friend.username.toLowerCase().includes(searchQuery.toLowerCase())
+  })
 
   if (loading) {
     return (
