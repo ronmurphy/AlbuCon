@@ -78,17 +78,43 @@
 
 .dm-message {
   max-width: 70%;
-  animation: fadeIn 0.2s ease;
+  margin-bottom: 0.75rem;
+  position: relative;
 }
 
-@keyframes fadeIn {
+/* Grouped messages have reduced spacing */
+.dm-message-grouped {
+  margin-bottom: 0.25rem;
+}
+
+/* Slide-in animations */
+.dm-message-own {
+  animation: slideInRight 0.3s ease;
+}
+
+.dm-message-other {
+  animation: slideInLeft 0.3s ease;
+}
+
+@keyframes slideInRight {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateX(30px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
@@ -102,22 +128,58 @@
 
 .dm-message-content {
   padding: 0.75rem 1rem;
-  border-radius: 12px;
+  border-radius: 18px;
   word-wrap: break-word;
   white-space: pre-wrap;
+  position: relative;
 }
 
 .dm-message-own .dm-message-content {
   background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
   color: white;
-  border-bottom-right-radius: 4px;
 }
 
 .dm-message-other .dm-message-content {
   background: var(--surface);
   color: var(--text-primary);
   border: 2px solid var(--border);
-  border-bottom-left-radius: 4px;
+}
+
+/* Bubble tails - only on last message of group */
+.dm-message-last-in-group.dm-message-own .dm-message-content::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: -8px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 15px 15px;
+  border-color: transparent transparent var(--secondary) transparent;
+}
+
+.dm-message-last-in-group.dm-message-other .dm-message-content::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -8px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 15px 15px 0;
+  border-color: transparent var(--border) transparent transparent;
+}
+
+.dm-message-last-in-group.dm-message-other .dm-message-content::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: -6px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 13px 13px 0;
+  border-color: transparent var(--surface) transparent transparent;
 }
 
 .dm-message-time {
@@ -138,6 +200,43 @@
 .dm-read-indicator {
   color: var(--primary);
   font-weight: 700;
+}
+
+/* Day Separator */
+.dm-date-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1.5rem 0;
+  position: relative;
+}
+
+.dm-date-separator::before,
+.dm-date-separator::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.dm-date-separator::before {
+  margin-right: 1rem;
+}
+
+.dm-date-separator::after {
+  margin-left: 1rem;
+}
+
+.dm-date-separator-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.25rem 0.75rem;
+  background: var(--background);
+  border-radius: 12px;
+  border: 1px solid var(--border);
 }
 
 /* Message Actions */

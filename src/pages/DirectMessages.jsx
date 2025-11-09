@@ -31,6 +31,65 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  // Helper function to format date separators
+  const formatDateSeparator = (date) => {
+    const messageDate = new Date(date)
+    const today = new Date()
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
+
+    // Reset time for comparison
+    const resetTime = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate())
+    const msgDay = resetTime(messageDate)
+    const todayDay = resetTime(today)
+    const yesterdayDay = resetTime(yesterday)
+
+    if (msgDay.getTime() === todayDay.getTime()) {
+      return 'Today'
+    } else if (msgDay.getTime() === yesterdayDay.getTime()) {
+      return 'Yesterday'
+    } else {
+      return messageDate.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: messageDate.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
+      })
+    }
+  }
+
+  // Check if messages should be grouped (same sender, within 3 minutes)
+  const shouldGroupWithPrevious = (currentMsg, prevMsg) => {
+    if (!prevMsg) return false
+    if (currentMsg.sender_id !== prevMsg.sender_id) return false
+
+    const currentTime = new Date(currentMsg.created_at).getTime()
+    const prevTime = new Date(prevMsg.created_at).getTime()
+    const diffMinutes = (currentTime - prevTime) / (1000 * 60)
+
+    return diffMinutes <= 3
+  }
+
+  // Check if we should show timestamp (first of group or 5+ min gap)
+  const shouldShowTimestamp = (currentMsg, prevMsg) => {
+    if (!prevMsg) return true
+
+    const currentTime = new Date(currentMsg.created_at).getTime()
+    const prevTime = new Date(prevMsg.created_at).getTime()
+    const diffMinutes = (currentTime - prevTime) / (1000 * 60)
+
+    return diffMinutes >= 5 || currentMsg.sender_id !== prevMsg.sender_id
+  }
+
+  // Check if date changed between messages
+  const shouldShowDateSeparator = (currentMsg, prevMsg) => {
+    if (!prevMsg) return true
+
+    const currentDate = new Date(currentMsg.created_at).setHours(0, 0, 0, 0)
+    const prevDate = new Date(prevMsg.created_at).setHours(0, 0, 0, 0)
+
+    return currentDate !== prevDate
+  }
+
   useEffect(() => {
     fetchMessages()
     setupTypingSubscription()
@@ -380,7 +439,7 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
             <p className="dm-empty-hint">Start the conversation!</p>
           </div>
         ) : (
-          messages.map((message) => {
+          messages.map((message, index) => {
             const isOwn = message.sender_id === user.id
             const images = message.image_urls && message.image_urls.length > 0
               ? message.image_urls
@@ -388,12 +447,29 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
             const isDeleted = message.deleted_at !== null
             const isEdited = message.edited_at !== null
             const isEditing = editingMessageId === message.id
+            const prevMsg = index > 0 ? messages[index - 1] : null
+            const nextMsg = index < messages.length - 1 ? messages[index + 1] : null
+
+            const isGrouped = shouldGroupWithPrevious(message, prevMsg)
+            const isLastInGroup = !shouldGroupWithPrevious(nextMsg, message)
+            const showTimestamp = shouldShowTimestamp(message, prevMsg)
+            const showDateSeparator = shouldShowDateSeparator(message, prevMsg)
 
             return (
-              <div
-                key={message.id}
-                className={`dm-message ${isOwn ? 'dm-message-own' : 'dm-message-other'} ${isDeleted ? 'dm-message-deleted' : ''}`}
-              >
+              <div key={message.id}>
+                {/* Day Separator */}
+                {showDateSeparator && (
+                  <div className="dm-date-separator">
+                    <span className="dm-date-separator-text">
+                      {formatDateSeparator(message.created_at)}
+                    </span>
+                  </div>
+                )}
+
+                {/* Message */}
+                <div
+                  className={`dm-message ${isOwn ? 'dm-message-own' : 'dm-message-other'} ${isDeleted ? 'dm-message-deleted' : ''} ${isGrouped ? 'dm-message-grouped' : ''} ${isLastInGroup ? 'dm-message-last-in-group' : ''}`}
+                >
                 {isDeleted ? (
                   // Deleted message
                   <div className="dm-message-content dm-message-removed">
@@ -456,11 +532,17 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
                     )}
                   </>
                 )}
-                <div className="dm-message-time">
-                  {new Date(message.created_at).toLocaleString()}
-                  {isOwn && message.read_at && <span className="dm-read-indicator"> ✓✓</span>}
-                </div>
+                {showTimestamp && (
+                  <div className="dm-message-time">
+                    {new Date(message.created_at).toLocaleTimeString('en-US', {
+                      hour: 'numeric',
+                      minute: '2-digit'
+                    })}
+                    {isOwn && message.read_at && <span className="dm-read-indicator"> ✓✓</span>}
+                  </div>
+                )}
               </div>
+            </div>
             )
           })
         )}
