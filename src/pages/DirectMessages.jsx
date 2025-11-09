@@ -5,6 +5,7 @@ import { convertEmoticons } from '../utils/emojiUtils'
 import { uploadImage, getUserImageCount } from '../lib/imageUtils'
 import VideoEmbed from '../components/VideoEmbed'
 import ImageCarousel from '../components/ImageCarousel'
+import MyImagesPicker from '../components/MyImagesPicker'
 import './DirectMessages.css'
 
 export default function DirectMessages({ recipientId, recipientUsername, recipientProfilePicture }) {
@@ -17,8 +18,14 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
   const [imagePreviews, setImagePreviews] = useState([])
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState(null)
+  const [recipientTyping, setRecipientTyping] = useState(false)
+  const [editingMessageId, setEditingMessageId] = useState(null)
+  const [editingContent, setEditingContent] = useState('')
+  const [showImagePicker, setShowImagePicker] = useState(false)
   const messagesEndRef = useRef(null)
   const fileInputRef = useRef(null)
+  const typingTimeoutRef = useRef(null)
+  const typingStatusRef = useRef(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -26,7 +33,147 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
 
   useEffect(() => {
     fetchMessages()
+    setupTypingSubscription()
+    return () => {
+      clearTypingStatus()
+      if (typingStatusRef.current) {
+        typingStatusRef.current.unsubscribe()
+      }
+    }
   }, [recipientId])
+
+  // Set up typing status subscription
+  const setupTypingSubscription = async () => {
+    if (!user || !recipientId) return
+
+    // Subscribe to typing status changes
+    const subscription = supabase
+      .channel(`typing:${user.id}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'typing_status',
+        filter: `recipient_id=eq.${user.id}`
+      }, (payload) => {
+        if (payload.new?.user_id === recipientId) {
+          setRecipientTyping(true)
+          // Auto-clear after 3 seconds of no updates
+          setTimeout(() => setRecipientTyping(false), 3000)
+        } else if (payload.eventType === 'DELETE' && payload.old?.user_id === recipientId) {
+          setRecipientTyping(false)
+        }
+      })
+      .subscribe()
+
+    typingStatusRef.current = subscription
+  }
+
+  // Send typing status
+  const sendTypingStatus = async () => {
+    if (!user || !recipientId) return
+
+    try {
+      await supabase
+        .from('typing_status')
+        .upsert({
+          user_id: user.id,
+          recipient_id: recipientId,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,recipient_id'
+        })
+    } catch (error) {
+      console.error('Error sending typing status:', error)
+    }
+  }
+
+  // Clear typing status
+  const clearTypingStatus = async () => {
+    if (!user || !recipientId) return
+
+    try {
+      await supabase
+        .from('typing_status')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('recipient_id', recipientId)
+    } catch (error) {
+      console.error('Error clearing typing status:', error)
+    }
+  }
+
+  // Handle typing with debounce
+  const handleTyping = () => {
+    sendTypingStatus()
+
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current)
+    }
+
+    // Set new timeout to clear typing status after 3 seconds
+    typingTimeoutRef.current = setTimeout(() => {
+      clearTypingStatus()
+    }, 3000)
+  }
+
+  // Start editing a message
+  const startEditingMessage = (message) => {
+    setEditingMessageId(message.id)
+    setEditingContent(message.content)
+  }
+
+  // Cancel editing
+  const cancelEditing = () => {
+    setEditingMessageId(null)
+    setEditingContent('')
+  }
+
+  // Save edited message
+  const saveEditedMessage = async (messageId) => {
+    if (!editingContent.trim()) {
+      setError('Message cannot be empty')
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('direct_messages')
+        .update({ content: convertEmoticons(editingContent.trim()) })
+        .eq('id', messageId)
+
+      if (error) throw error
+
+      setEditingMessageId(null)
+      setEditingContent('')
+      await fetchMessages()
+    } catch (error) {
+      console.error('Error editing message:', error)
+      setError('Failed to edit message. Please try again.')
+    }
+  }
+
+  // Delete message (soft delete)
+  const deleteMessage = async (messageId) => {
+    if (!confirm('Are you sure you want to delete this message?')) return
+
+    try {
+      const { error } = await supabase
+        .from('direct_messages')
+        .update({
+          deleted_at: new Date().toISOString(),
+          content: '' // Clear content for privacy
+        })
+        .eq('id', messageId)
+
+      if (error) throw error
+
+      await fetchMessages()
+    } catch (error) {
+      console.error('Error deleting message:', error)
+      setError('Failed to delete message. Please try again.')
+    }
+  }
 
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files)
@@ -88,6 +235,15 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
     }
   }
 
+  // Handle selecting images from My Images
+  const handleSelectFromMyImages = (selectedUrls) => {
+    // Convert URLs to preview format
+    const newPreviews = selectedUrls.map(url => url) // URLs are already usable
+    setImagePreviews(prev => [...prev, ...newPreviews].slice(0, 4))
+    // Store URLs directly instead of file objects
+    setImageFiles(prev => [...prev, ...selectedUrls].slice(0, 4))
+  }
+
   useEffect(() => {
     scrollToBottom()
   }, [messages])
@@ -134,21 +290,30 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
     try {
       const imageUrls = []
 
-      // Upload all selected images
+      // Handle images (both new uploads and shared from My Images)
       if (imageFiles.length > 0) {
-        // Check image limit
-        const count = await getUserImageCount(user.id)
-        if (count + imageFiles.length > 20) {
-          throw new Error(`You can only upload ${20 - count} more images. You have ${count}/20 images uploaded.`)
-        }
-
         setIsUploading(true)
 
-        // Upload each image
-        for (const file of imageFiles) {
-          const url = await uploadImage(file, user.id)
-          imageUrls.push(url)
+        // Separate new uploads from shared URLs
+        const newUploads = imageFiles.filter(item => typeof item !== 'string')
+        const sharedUrls = imageFiles.filter(item => typeof item === 'string')
+
+        // Check image limit for new uploads only
+        if (newUploads.length > 0) {
+          const count = await getUserImageCount(user.id)
+          if (count + newUploads.length > 20) {
+            throw new Error(`You can only upload ${20 - count} more images. You have ${count}/20 images uploaded.`)
+          }
+
+          // Upload each new image
+          for (const file of newUploads) {
+            const url = await uploadImage(file, user.id)
+            imageUrls.push(url)
+          }
         }
+
+        // Add shared URLs directly
+        imageUrls.push(...sharedUrls)
 
         setIsUploading(false)
       }
@@ -166,6 +331,7 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
 
       setNewMessage('')
       clearAllImages()
+      clearTypingStatus()
       await fetchMessages()
     } catch (error) {
       console.error('Error sending message:', error)
@@ -219,20 +385,77 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
             const images = message.image_urls && message.image_urls.length > 0
               ? message.image_urls
               : []
+            const isDeleted = message.deleted_at !== null
+            const isEdited = message.edited_at !== null
+            const isEditing = editingMessageId === message.id
+
             return (
               <div
                 key={message.id}
-                className={`dm-message ${isOwn ? 'dm-message-own' : 'dm-message-other'}`}
+                className={`dm-message ${isOwn ? 'dm-message-own' : 'dm-message-other'} ${isDeleted ? 'dm-message-deleted' : ''}`}
               >
-                {message.content && (
-                  <div className="dm-message-content">
-                    {message.content}
+                {isDeleted ? (
+                  // Deleted message
+                  <div className="dm-message-content dm-message-removed">
+                    <em>This message was removed</em>
                   </div>
+                ) : isEditing ? (
+                  // Edit mode
+                  <div className="dm-message-edit">
+                    <textarea
+                      className="dm-edit-input"
+                      value={editingContent}
+                      onChange={(e) => setEditingContent(e.target.value)}
+                      autoFocus
+                    />
+                    <div className="dm-edit-actions">
+                      <button
+                        className="btn-small btn-primary"
+                        onClick={() => saveEditedMessage(message.id)}
+                      >
+                        Save
+                      </button>
+                      <button
+                        className="btn-small"
+                        onClick={cancelEditing}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  // Normal message
+                  <>
+                    {message.content && (
+                      <div className="dm-message-content">
+                        {message.content}
+                        {isEdited && <span className="dm-edited-indicator"> (edited)</span>}
+                      </div>
+                    )}
+                    {/* Display images if present */}
+                    {images.length > 0 && <ImageCarousel images={images} />}
+                    {/* Display video embed if URL detected in message */}
+                    <VideoEmbed content={message.content} />
+                    {isOwn && !isDeleted && (
+                      <div className="dm-message-actions">
+                        <button
+                          className="dm-action-btn"
+                          onClick={() => startEditingMessage(message)}
+                          title="Edit message"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          className="dm-action-btn"
+                          onClick={() => deleteMessage(message.id)}
+                          title="Delete message"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
-                {/* Display images if present */}
-                {images.length > 0 && <ImageCarousel images={images} />}
-                {/* Display video embed if URL detected in message */}
-                <VideoEmbed content={message.content} />
                 <div className="dm-message-time">
                   {new Date(message.created_at).toLocaleString()}
                   {isOwn && message.read_at && <span className="dm-read-indicator"> ✓✓</span>}
@@ -240,6 +463,16 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
               </div>
             )
           })
+        )}
+        {recipientTyping && (
+          <div className="dm-typing-indicator">
+            <div className="dm-typing-bubble">
+              <span className="dm-typing-dot"></span>
+              <span className="dm-typing-dot"></span>
+              <span className="dm-typing-dot"></span>
+            </div>
+            <div className="dm-typing-text">{recipientUsername} is typing...</div>
+          </div>
         )}
         <div ref={messagesEndRef} />
       </div>
@@ -284,15 +517,27 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
             className="dm-image-btn"
             onClick={() => fileInputRef.current?.click()}
             disabled={sending || isUploading || imageFiles.length >= 4}
-            title={`Upload Images (${imageFiles.length}/4 selected)`}
+            title="Upload new images"
           >
             📷
+          </button>
+          <button
+            type="button"
+            className="dm-image-btn dm-myimages-btn"
+            onClick={() => setShowImagePicker(true)}
+            disabled={sending || isUploading || imageFiles.length >= 4}
+            title="Share from My Images"
+          >
+            🖼️
           </button>
           <textarea
             className="dm-input"
             placeholder="Type a message..."
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={(e) => {
+              setNewMessage(e.target.value)
+              handleTyping()
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault()
@@ -311,6 +556,15 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
           </button>
         </div>
       </form>
+
+      {/* My Images Picker Modal */}
+      {showImagePicker && (
+        <MyImagesPicker
+          onSelectImages={handleSelectFromMyImages}
+          maxImages={4 - imageFiles.length}
+          onClose={() => setShowImagePicker(false)}
+        />
+      )}
     </div>
   )
 }
