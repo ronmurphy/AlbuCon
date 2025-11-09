@@ -171,24 +171,6 @@ export default function Dock({ openColumns, onToggleColumn, onCloseColumn, onSig
           </div>
           <span className="dock-label">Apps</span>
         </button>
-
-        {/* Divider before settings */}
-        <div className="dock-divider" />
-
-        {/* Settings */}
-        <button
-          className={`dock-item ${isColumnOpen('settings') ? 'active' : ''}`}
-          onClick={() => onToggleColumn('settings')}
-          onMouseEnter={() => setHoveredItem('settings')}
-          onMouseLeave={() => setHoveredItem(null)}
-          title="Settings"
-        >
-          <div className="dock-icon-wrapper">
-            <span className="dock-icon">⚙️</span>
-          </div>
-          <span className="dock-label">Settings</span>
-          {isColumnOpen('settings') && <div className="dock-indicator" />}
-        </button>
       </div>
     </div>
   )
