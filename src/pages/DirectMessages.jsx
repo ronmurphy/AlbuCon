@@ -17,8 +17,11 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
   const [imagePreviews, setImagePreviews] = useState([])
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState(null)
+  const [recipientTyping, setRecipientTyping] = useState(false)
   const messagesEndRef = useRef(null)
   const fileInputRef = useRef(null)
+  const typingTimeoutRef = useRef(null)
+  const typingStatusRef = useRef(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -26,7 +29,89 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
 
   useEffect(() => {
     fetchMessages()
+    setupTypingSubscription()
+    return () => {
+      clearTypingStatus()
+      if (typingStatusRef.current) {
+        typingStatusRef.current.unsubscribe()
+      }
+    }
   }, [recipientId])
+
+  // Set up typing status subscription
+  const setupTypingSubscription = async () => {
+    if (!user || !recipientId) return
+
+    // Subscribe to typing status changes
+    const subscription = supabase
+      .channel(`typing:${user.id}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'typing_status',
+        filter: `recipient_id=eq.${user.id}`
+      }, (payload) => {
+        if (payload.new?.user_id === recipientId) {
+          setRecipientTyping(true)
+          // Auto-clear after 3 seconds of no updates
+          setTimeout(() => setRecipientTyping(false), 3000)
+        } else if (payload.eventType === 'DELETE' && payload.old?.user_id === recipientId) {
+          setRecipientTyping(false)
+        }
+      })
+      .subscribe()
+
+    typingStatusRef.current = subscription
+  }
+
+  // Send typing status
+  const sendTypingStatus = async () => {
+    if (!user || !recipientId) return
+
+    try {
+      await supabase
+        .from('typing_status')
+        .upsert({
+          user_id: user.id,
+          recipient_id: recipientId,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,recipient_id'
+        })
+    } catch (error) {
+      console.error('Error sending typing status:', error)
+    }
+  }
+
+  // Clear typing status
+  const clearTypingStatus = async () => {
+    if (!user || !recipientId) return
+
+    try {
+      await supabase
+        .from('typing_status')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('recipient_id', recipientId)
+    } catch (error) {
+      console.error('Error clearing typing status:', error)
+    }
+  }
+
+  // Handle typing with debounce
+  const handleTyping = () => {
+    sendTypingStatus()
+
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current)
+    }
+
+    // Set new timeout to clear typing status after 3 seconds
+    typingTimeoutRef.current = setTimeout(() => {
+      clearTypingStatus()
+    }, 3000)
+  }
 
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files)
@@ -166,6 +251,7 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
 
       setNewMessage('')
       clearAllImages()
+      clearTypingStatus()
       await fetchMessages()
     } catch (error) {
       console.error('Error sending message:', error)
@@ -241,6 +327,16 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
             )
           })
         )}
+        {recipientTyping && (
+          <div className="dm-typing-indicator">
+            <div className="dm-typing-bubble">
+              <span className="dm-typing-dot"></span>
+              <span className="dm-typing-dot"></span>
+              <span className="dm-typing-dot"></span>
+            </div>
+            <div className="dm-typing-text">{recipientUsername} is typing...</div>
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
 
@@ -292,7 +388,10 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
             className="dm-input"
             placeholder="Type a message..."
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={(e) => {
+              setNewMessage(e.target.value)
+              handleTyping()
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault()
