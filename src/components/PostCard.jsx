@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import CommentsSection from './CommentsSection'
 import FollowButton from './FollowButton'
 import VideoEmbed from './VideoEmbed'
+import ImageCarousel from './ImageCarousel'
 import { reactionTypesArray, countReactionsByType, getUserReaction, getTotalReactionCount } from '../utils/reactionTypes'
 import './PostCard.css'
 
@@ -257,26 +258,19 @@ export default function PostCard({ post, onLikeUpdate, onImageClick, onPostDelet
         </div>
       )}
 
-      {/* Display image if present */}
-      {post.image_url && (
-        <div
-          className="post-image-container"
-          onClick={() => onImageClick?.(post.image_url, 'Post image')}
-          style={{ cursor: onImageClick ? 'pointer' : 'default' }}
-        >
-          <img
-            src={post.image_url}
-            alt="Post image"
-            className="post-image"
-            loading="lazy"
-            decoding="async"
-            onError={(e) => {
-              e.target.style.display = 'none'
-              console.error('Failed to load image:', post.image_url)
-            }}
-          />
-        </div>
-      )}
+      {/* Display images if present (supports both new array and legacy single image) */}
+      {(() => {
+        // Get images from new array format or fall back to old single image
+        const images = post.image_urls && post.image_urls.length > 0
+          ? post.image_urls
+          : post.image_url
+            ? [post.image_url]
+            : []
+
+        return images.length > 0 ? (
+          <ImageCarousel images={images} onImageClick={onImageClick} />
+        ) : null
+      })()}
 
       {/* Display video embed if URL detected in content (YouTube, TikTok, Vimeo) */}
       <VideoEmbed content={post.content} />
