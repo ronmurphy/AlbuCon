@@ -5,7 +5,7 @@ import PostCard from '../components/PostCard'
 import FollowStats from '../components/FollowStats'
 import './Profile.css'
 
-export default function Profile() {
+export default function Profile({ onOpenSettings }) {
   const { user } = useAuth()
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -103,6 +103,13 @@ export default function Profile() {
 
         {/* Follow Stats */}
         <FollowStats userId={user?.id} />
+
+        {/* Settings Button */}
+        {onOpenSettings && (
+          <button className="btn btn-secondary profile-settings-btn" onClick={onOpenSettings}>
+            ⚙️ Settings
+          </button>
+        )}
 
         <div className="profile-stats">
           <div className="stat">
