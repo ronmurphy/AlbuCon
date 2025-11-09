@@ -1,0 +1,204 @@
+.messages-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--background);
+  overflow-y: auto;
+}
+
+.messages-header {
+  padding: 2rem;
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+}
+
+.messages-header h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.5rem 0;
+}
+
+.messages-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Search Bar */
+.messages-search {
+  padding: 1rem 2rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.messages-search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+
+.messages-search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.messages-search-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* Empty State */
+.messages-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.messages-empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.messages-empty-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.messages-empty-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Friends List */
+.messages-friends-list {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.messages-friend-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.messages-friend-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--shadow);
+  border-color: var(--primary);
+}
+
+.messages-self-item {
+  border-color: var(--secondary);
+  background: linear-gradient(135deg, rgba(94, 181, 174, 0.1) 0%, rgba(76, 194, 203, 0.1) 100%);
+}
+
+.messages-self-item:hover {
+  border-color: var(--secondary);
+  background: linear-gradient(135deg, rgba(94, 181, 174, 0.2) 0%, rgba(76, 194, 203, 0.2) 100%);
+}
+
+.messages-friend-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.messages-friend-pic {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.messages-friend-initial {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: white;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.messages-friend-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.messages-friend-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.messages-friend-hint {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .messages-header {
+    padding: 1.5rem 1rem;
+  }
+
+  .messages-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .messages-search {
+    padding: 1rem;
+  }
+
+  .messages-friends-list {
+    padding: 0.75rem;
+  }
+
+  .messages-friend-item {
+    padding: 0.75rem;
+  }
+
+  .messages-friend-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .messages-friend-initial {
+    font-size: 1.25rem;
+  }
+
+  .messages-friend-name {
+    font-size: 1rem;
+  }
+}
