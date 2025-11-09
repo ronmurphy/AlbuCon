@@ -305,6 +305,14 @@
   cursor: not-allowed;
 }
 
+.dm-myimages-btn {
+  background: linear-gradient(135deg, #9b59b6 0%, #e74c3c 100%);
+}
+
+.dm-myimages-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #8e44ad 0%, #c0392b 100%);
+}
+
 /* Image Previews */
 .dm-image-previews {
   display: grid;

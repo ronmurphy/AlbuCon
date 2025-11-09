@@ -5,6 +5,7 @@ import { convertEmoticons } from '../utils/emojiUtils'
 import { uploadImage, getUserImageCount } from '../lib/imageUtils'
 import VideoEmbed from '../components/VideoEmbed'
 import ImageCarousel from '../components/ImageCarousel'
+import MyImagesPicker from '../components/MyImagesPicker'
 import './DirectMessages.css'
 
 export default function DirectMessages({ recipientId, recipientUsername, recipientProfilePicture }) {
@@ -20,6 +21,7 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
   const [recipientTyping, setRecipientTyping] = useState(false)
   const [editingMessageId, setEditingMessageId] = useState(null)
   const [editingContent, setEditingContent] = useState('')
+  const [showImagePicker, setShowImagePicker] = useState(false)
   const messagesEndRef = useRef(null)
   const fileInputRef = useRef(null)
   const typingTimeoutRef = useRef(null)
@@ -233,6 +235,15 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
     }
   }
 
+  // Handle selecting images from My Images
+  const handleSelectFromMyImages = (selectedUrls) => {
+    // Convert URLs to preview format
+    const newPreviews = selectedUrls.map(url => url) // URLs are already usable
+    setImagePreviews(prev => [...prev, ...newPreviews].slice(0, 4))
+    // Store URLs directly instead of file objects
+    setImageFiles(prev => [...prev, ...selectedUrls].slice(0, 4))
+  }
+
   useEffect(() => {
     scrollToBottom()
   }, [messages])
@@ -279,21 +290,30 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
     try {
       const imageUrls = []
 
-      // Upload all selected images
+      // Handle images (both new uploads and shared from My Images)
       if (imageFiles.length > 0) {
-        // Check image limit
-        const count = await getUserImageCount(user.id)
-        if (count + imageFiles.length > 20) {
-          throw new Error(`You can only upload ${20 - count} more images. You have ${count}/20 images uploaded.`)
-        }
-
         setIsUploading(true)
 
-        // Upload each image
-        for (const file of imageFiles) {
-          const url = await uploadImage(file, user.id)
-          imageUrls.push(url)
+        // Separate new uploads from shared URLs
+        const newUploads = imageFiles.filter(item => typeof item !== 'string')
+        const sharedUrls = imageFiles.filter(item => typeof item === 'string')
+
+        // Check image limit for new uploads only
+        if (newUploads.length > 0) {
+          const count = await getUserImageCount(user.id)
+          if (count + newUploads.length > 20) {
+            throw new Error(`You can only upload ${20 - count} more images. You have ${count}/20 images uploaded.`)
+          }
+
+          // Upload each new image
+          for (const file of newUploads) {
+            const url = await uploadImage(file, user.id)
+            imageUrls.push(url)
+          }
         }
+
+        // Add shared URLs directly
+        imageUrls.push(...sharedUrls)
 
         setIsUploading(false)
       }
@@ -497,9 +517,18 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
             className="dm-image-btn"
             onClick={() => fileInputRef.current?.click()}
             disabled={sending || isUploading || imageFiles.length >= 4}
-            title={`Upload Images (${imageFiles.length}/4 selected)`}
+            title="Upload new images"
           >
             📷
+          </button>
+          <button
+            type="button"
+            className="dm-image-btn dm-myimages-btn"
+            onClick={() => setShowImagePicker(true)}
+            disabled={sending || isUploading || imageFiles.length >= 4}
+            title="Share from My Images"
+          >
+            🖼️
           </button>
           <textarea
             className="dm-input"
@@ -527,6 +556,15 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
           </button>
         </div>
       </form>
+
+      {/* My Images Picker Modal */}
+      {showImagePicker && (
+        <MyImagesPicker
+          onSelectImages={handleSelectFromMyImages}
+          maxImages={4 - imageFiles.length}
+          onClose={() => setShowImagePicker(false)}
+        />
+      )}
     </div>
   )
 }
