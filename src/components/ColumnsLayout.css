@@ -29,6 +29,13 @@
   flex-shrink: 0;
 }
 
+.column-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 .column-title {
   font-size: 1.5rem;
   font-weight: 700;
