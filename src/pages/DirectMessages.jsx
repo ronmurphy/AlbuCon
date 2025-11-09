@@ -411,26 +411,6 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
 
   return (
     <div className="dm-container">
-      {/* DM Header */}
-      <div className="dm-header">
-        <div className="dm-recipient-info">
-          <div className="dm-recipient-avatar">
-            {recipientProfilePicture ? (
-              <img
-                src={recipientProfilePicture}
-                alt={recipientUsername}
-                className="dm-recipient-pic"
-              />
-            ) : (
-              <div className="dm-recipient-initial">
-                {recipientUsername?.[0]?.toUpperCase() || '?'}
-              </div>
-            )}
-          </div>
-          <h3 className="dm-recipient-name">{recipientUsername || 'User'}</h3>
-        </div>
-      </div>
-
       {/* Messages List */}
       <div className="dm-messages">
         {messages.length === 0 ? (

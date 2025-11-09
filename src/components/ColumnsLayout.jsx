@@ -475,7 +475,7 @@ export default function ColumnsLayout() {
                 ✕
               </button>
             </div>
-            <Profile />
+            <Profile onOpenSettings={() => openColumn('settings')} />
           </div>
         )
 
