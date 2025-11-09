@@ -475,7 +475,15 @@ export default function ColumnsLayout() {
                 ✕
               </button>
             </div>
-            <Profile onOpenSettings={() => openColumn('settings')} />
+            <Profile
+              onOpenSettings={() => openColumn('settings')}
+              onOpenGallery={(userId, username) => {
+                openColumn('gallery', { userId, username })
+              }}
+              onOpenDirectMessage={(recipientId, recipientUsername, recipientProfilePicture) => {
+                openColumn('dm', { recipientId, recipientUsername, recipientProfilePicture })
+              }}
+            />
           </div>
         )
 
