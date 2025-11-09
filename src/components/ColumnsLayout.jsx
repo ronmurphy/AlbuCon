@@ -11,6 +11,7 @@ import MyImages from '../pages/MyImages'
 import UserTimeline from '../pages/UserTimeline'
 import Gallery from '../pages/Gallery'
 import Conversations from '../pages/Conversations'
+import Messages from '../pages/Messages'
 import DirectMessages from '../pages/DirectMessages'
 import FloatingWindow from './FloatingWindow'
 import ImageViewer from './ImageViewer'
@@ -431,6 +432,33 @@ export default function ColumnsLayout() {
             <Friends onOpenUserTimeline={(userId, username, profilePic) => {
               openColumn('user', { userId, username, profilePicture: profilePic })
             }} />
+          </div>
+        )
+
+      case 'messages':
+        return (
+          <div key={column.id} className="column-item">
+            <div className="column-header">
+              <h2 className="column-title">💬 Messages</h2>
+              <button
+                className="close-column-btn"
+                onClick={() => closeColumn(column.id)}
+                title="Close column"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="column-content">
+              <Messages
+                onOpenDM={(recipientId, recipientUsername, recipientProfilePicture) => {
+                  openColumn('dm', {
+                    recipientId,
+                    recipientUsername,
+                    recipientProfilePicture
+                  })
+                }}
+              />
+            </div>
           </div>
         )
 

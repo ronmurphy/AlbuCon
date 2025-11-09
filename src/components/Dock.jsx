@@ -40,6 +40,7 @@ export default function Dock({ openColumns, onToggleColumn, onCloseColumn, onSig
   // Static dock items
   const staticItems = [
     { id: 'feed', icon: '🏠', label: 'Feed', type: 'feed' },
+    { id: 'messages', icon: '💬', label: 'Messages', type: 'messages' },
     { id: 'friends', icon: '👥', label: 'Friends', badge: pendingCount, type: 'friends' },
     { id: 'profile', icon: '👤', label: 'Profile', type: 'profile' },
     { id: 'images', icon: '🖼️', label: 'My Images', type: 'images' },
