@@ -68,58 +68,58 @@ export default function Messages({ onOpenDM }) {
       )}
 
       {/* Friends List */}
-      {friends.length === 0 ? (
-        <div className="messages-empty">
-          <p className="messages-empty-icon">👥</p>
-          <p className="messages-empty-title">No friends yet</p>
-          <p className="messages-empty-subtitle">
-            Add some friends to start messaging!
-          </p>
-        </div>
-      ) : filteredFriends.length === 0 ? (
-        <div className="messages-empty">
-          <p className="messages-empty-icon">🔍</p>
-          <p className="messages-empty-title">No results</p>
-          <p className="messages-empty-subtitle">
-            No friends found matching "{searchQuery}"
-          </p>
-        </div>
-      ) : (
-        <div className="messages-friends-list">
-          {/* Self (Personal Notes) */}
-          <div
-            className="messages-friend-item messages-self-item"
-            onClick={() => handleOpenDM({
-              id: user.id,
-              username: user.user_metadata?.username || 'You',
-              profile_picture_url: user.user_metadata?.profile_picture_url
-            })}
-          >
-            <div className="messages-friend-avatar">
-              {user.user_metadata?.profile_picture_url ? (
-                <img
-                  src={user.user_metadata.profile_picture_url}
-                  alt="You"
-                  className="messages-friend-pic"
-                />
-              ) : (
-                <div className="messages-friend-initial">
-                  {user.user_metadata?.username?.[0]?.toUpperCase() || 'Y'}
-                </div>
-              )}
+      <div className="messages-friends-list">
+        {/* Self (Personal Notes) - Always shown */}
+        <div
+          className="messages-friend-item messages-self-item"
+          onClick={() => handleOpenDM({
+            id: user.id,
+            username: user.user_metadata?.username || 'You',
+            profile_picture_url: user.user_metadata?.profile_picture_url
+          })}
+        >
+          <div className="messages-friend-avatar">
+            {user.user_metadata?.profile_picture_url ? (
+              <img
+                src={user.user_metadata.profile_picture_url}
+                alt="You"
+                className="messages-friend-pic"
+              />
+            ) : (
+              <div className="messages-friend-initial">
+                {user.user_metadata?.username?.[0]?.toUpperCase() || 'Y'}
+              </div>
+            )}
+          </div>
+          <div className="messages-friend-info">
+            <div className="messages-friend-name">
+              {user.user_metadata?.username || 'You'} (Personal Notes)
             </div>
-            <div className="messages-friend-info">
-              <div className="messages-friend-name">
-                {user.user_metadata?.username || 'You'} (Personal Notes)
-              </div>
-              <div className="messages-friend-hint">
-                Send messages to yourself
-              </div>
+            <div className="messages-friend-hint">
+              Send messages to yourself
             </div>
           </div>
+        </div>
 
-          {/* Friends */}
-          {filteredFriends.map((friend) => (
+        {/* Friends */}
+        {friends.length === 0 ? (
+          <div className="messages-empty">
+            <p className="messages-empty-icon">👥</p>
+            <p className="messages-empty-title">No friends yet</p>
+            <p className="messages-empty-subtitle">
+              Add some friends to start messaging!
+            </p>
+          </div>
+        ) : filteredFriends.length === 0 ? (
+          <div className="messages-empty">
+            <p className="messages-empty-icon">🔍</p>
+            <p className="messages-empty-title">No results</p>
+            <p className="messages-empty-subtitle">
+              No friends found matching "{searchQuery}"
+            </p>
+          </div>
+        ) : (
+          filteredFriends.map((friend) => (
             <div
               key={friend.id}
               className="messages-friend-item"
@@ -143,9 +143,9 @@ export default function Messages({ onOpenDM }) {
                 <div className="messages-friend-hint">Click to message</div>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </div>
   )
 }

@@ -59,7 +59,7 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
 
   // Check if messages should be grouped (same sender, within 3 minutes)
   const shouldGroupWithPrevious = (currentMsg, prevMsg) => {
-    if (!prevMsg) return false
+    if (!currentMsg || !prevMsg) return false
     if (currentMsg.sender_id !== prevMsg.sender_id) return false
 
     const currentTime = new Date(currentMsg.created_at).getTime()
@@ -71,6 +71,7 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
 
   // Check if we should show timestamp (first of group or 5+ min gap)
   const shouldShowTimestamp = (currentMsg, prevMsg) => {
+    if (!currentMsg) return false
     if (!prevMsg) return true
 
     const currentTime = new Date(currentMsg.created_at).getTime()
@@ -82,6 +83,7 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
 
   // Check if date changed between messages
   const shouldShowDateSeparator = (currentMsg, prevMsg) => {
+    if (!currentMsg) return false
     if (!prevMsg) return true
 
     const currentDate = new Date(currentMsg.created_at).setHours(0, 0, 0, 0)
