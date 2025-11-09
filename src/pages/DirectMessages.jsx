@@ -18,6 +18,8 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState(null)
   const [recipientTyping, setRecipientTyping] = useState(false)
+  const [editingMessageId, setEditingMessageId] = useState(null)
+  const [editingContent, setEditingContent] = useState('')
   const messagesEndRef = useRef(null)
   const fileInputRef = useRef(null)
   const typingTimeoutRef = useRef(null)
@@ -111,6 +113,64 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
     typingTimeoutRef.current = setTimeout(() => {
       clearTypingStatus()
     }, 3000)
+  }
+
+  // Start editing a message
+  const startEditingMessage = (message) => {
+    setEditingMessageId(message.id)
+    setEditingContent(message.content)
+  }
+
+  // Cancel editing
+  const cancelEditing = () => {
+    setEditingMessageId(null)
+    setEditingContent('')
+  }
+
+  // Save edited message
+  const saveEditedMessage = async (messageId) => {
+    if (!editingContent.trim()) {
+      setError('Message cannot be empty')
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('direct_messages')
+        .update({ content: convertEmoticons(editingContent.trim()) })
+        .eq('id', messageId)
+
+      if (error) throw error
+
+      setEditingMessageId(null)
+      setEditingContent('')
+      await fetchMessages()
+    } catch (error) {
+      console.error('Error editing message:', error)
+      setError('Failed to edit message. Please try again.')
+    }
+  }
+
+  // Delete message (soft delete)
+  const deleteMessage = async (messageId) => {
+    if (!confirm('Are you sure you want to delete this message?')) return
+
+    try {
+      const { error } = await supabase
+        .from('direct_messages')
+        .update({
+          deleted_at: new Date().toISOString(),
+          content: '' // Clear content for privacy
+        })
+        .eq('id', messageId)
+
+      if (error) throw error
+
+      await fetchMessages()
+    } catch (error) {
+      console.error('Error deleting message:', error)
+      setError('Failed to delete message. Please try again.')
+    }
   }
 
   const handleFileSelect = (e) => {
@@ -305,20 +365,77 @@ export default function DirectMessages({ recipientId, recipientUsername, recipie
             const images = message.image_urls && message.image_urls.length > 0
               ? message.image_urls
               : []
+            const isDeleted = message.deleted_at !== null
+            const isEdited = message.edited_at !== null
+            const isEditing = editingMessageId === message.id
+
             return (
               <div
                 key={message.id}
-                className={`dm-message ${isOwn ? 'dm-message-own' : 'dm-message-other'}`}
+                className={`dm-message ${isOwn ? 'dm-message-own' : 'dm-message-other'} ${isDeleted ? 'dm-message-deleted' : ''}`}
               >
-                {message.content && (
-                  <div className="dm-message-content">
-                    {message.content}
+                {isDeleted ? (
+                  // Deleted message
+                  <div className="dm-message-content dm-message-removed">
+                    <em>This message was removed</em>
                   </div>
+                ) : isEditing ? (
+                  // Edit mode
+                  <div className="dm-message-edit">
+                    <textarea
+                      className="dm-edit-input"
+                      value={editingContent}
+                      onChange={(e) => setEditingContent(e.target.value)}
+                      autoFocus
+                    />
+                    <div className="dm-edit-actions">
+                      <button
+                        className="btn-small btn-primary"
+                        onClick={() => saveEditedMessage(message.id)}
+                      >
+                        Save
+                      </button>
+                      <button
+                        className="btn-small"
+                        onClick={cancelEditing}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  // Normal message
+                  <>
+                    {message.content && (
+                      <div className="dm-message-content">
+                        {message.content}
+                        {isEdited && <span className="dm-edited-indicator"> (edited)</span>}
+                      </div>
+                    )}
+                    {/* Display images if present */}
+                    {images.length > 0 && <ImageCarousel images={images} />}
+                    {/* Display video embed if URL detected in message */}
+                    <VideoEmbed content={message.content} />
+                    {isOwn && !isDeleted && (
+                      <div className="dm-message-actions">
+                        <button
+                          className="dm-action-btn"
+                          onClick={() => startEditingMessage(message)}
+                          title="Edit message"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          className="dm-action-btn"
+                          onClick={() => deleteMessage(message.id)}
+                          title="Delete message"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
-                {/* Display images if present */}
-                {images.length > 0 && <ImageCarousel images={images} />}
-                {/* Display video embed if URL detected in message */}
-                <VideoEmbed content={message.content} />
                 <div className="dm-message-time">
                   {new Date(message.created_at).toLocaleString()}
                   {isOwn && message.read_at && <span className="dm-read-indicator"> ✓✓</span>}
