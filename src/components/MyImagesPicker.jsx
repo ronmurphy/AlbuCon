@@ -20,7 +20,7 @@ export default function MyImagesPicker({ onSelectImages, maxImages = 4, onClose 
       setLoading(true)
       const data = await getUserImages(user.id)
       console.log('MyImagesPicker - Loaded images:', data)
-      console.log('MyImagesPicker - Image URLs:', data.map(img => img.image_url))
+      console.log('MyImagesPicker - Image URLs:', data.map(img => img.public_url))
       setImages(data)
     } catch (err) {
       console.error('Error loading images:', err)
@@ -69,23 +69,23 @@ export default function MyImagesPicker({ onSelectImages, maxImages = 4, onClose 
         ) : (
           <div className="my-images-picker-grid">
             {images.map((image) => {
-              const isSelected = selectedImages.includes(image.image_url)
+              const isSelected = selectedImages.includes(image.public_url)
               return (
                 <div
                   key={image.id}
                   className={`my-images-picker-item ${isSelected ? 'selected' : ''}`}
-                  onClick={() => toggleImageSelection(image.image_url)}
+                  onClick={() => toggleImageSelection(image.public_url)}
                 >
                   <img
-                    src={image.image_url}
+                    src={image.public_url}
                     alt="Your image"
                     onError={(e) => {
-                      console.error('Failed to load image:', image.image_url)
+                      console.error('Failed to load image:', image.public_url)
                       e.target.style.border = '2px solid red'
                       e.target.alt = 'Failed to load'
                     }}
                     onLoad={() => {
-                      console.log('Successfully loaded image:', image.image_url)
+                      console.log('Successfully loaded image:', image.public_url)
                     }}
                   />
                   {isSelected && (
